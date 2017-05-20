@@ -1,75 +1,73 @@
-@echo off &SETLOCAL ENABLEEXTENSIONS ENABLEDELAYEDEXPANSION
-echo Checking for Administrator elevation...
-echo.
+@ECHO off &SETLOCAL ENABLEEXTENSIONS ENABLEDELAYEDEXPANSION
+ECHO Checking for Administrator elevation...
+ECHO.
 openfiles > NUL 2>&1
-if %errorlevel%==0 (
-        echo Elevation found! Proceeding...
-) else (
-        echo You are not running as Administrator...
-        echo This batch cannot do it's job without elevation!
-        echo.
-        echo Right-click and select ^'Run as Administrator^' and try again...
-        echo.
-        echo Press any key to exit...
-        pause > NUL
+IF NOT ERRORLEVEL 1 (
+        ECHO Elevation found! Proceeding...
+) ELSE (
+        ECHO You are not running as Administrator...
+        ECHO This batch cannot do it's job without elevation!
+        ECHO.
+        ECHO Right-click and select ^'Run as Administrator^' and try again...
+        ECHO.
+        ECHO Press any key to exit...
+        PAUSE > NUL
         exit
 )
 
-FOR /f "tokens=4-7 delims=[.] " %%i IN ('ver') DO (IF %%i==Version (SET winversion=%%j%%k) ELSE (SET winversion=%%i%%j))
+FOR /F "TOKENS=4-7 DELIMS=[.] " %%i IN ('ver') DO (IF %%i==Version (SET winversion=%%j%%k) ELSE (SET winversion=%%i%%j))
 FOR /F "TOKENS=1,* DELIMS==" %%u IN ('WMIC OS GET CAPTION /VALUE') DO IF /I "%%u"=="Caption" SET winedition=%%v
 SET winedition=%winedition:~10%
 
-title WINDOWS GAMING TWEAKS BY rype
+TITLE WINDOWS GAMING TWEAKS BY rype
 
-:home
-cls
-call :xtitle WINDOWS GAMING TWEAKS BY rype
-echo.
-echo Select:
-echo.
-echo 1. Service Tweaks 
-echo 2. System Tweaks
-echo 3. Network Tweaks
-IF %winversion% == 100 (echo 4. Remove Windows 10 Apps)
-echo 5. PowerConfig Tweaks
-echo 6. N/A
-echo 7. N/A
-echo 8. N/A
-echo 9. N/A
-echo.
+:HOME
+CLS
+CALL :XTITLE WINDOWS GAMING TWEAKS BY rype
+ECHO Your Windows Edition: %winedition%
+ECHO.
+ECHO Select:
+ECHO.
+CALL :XMENU Service Tweaks 
+CALL :XMENU System Tweaks
+CALL :XMENU Network Tweaks
+IF %winversion% == 100 (CALL :XMENU Remove Windows 10 Apps) ELSE (CALL :XMENU N/A)
+CALL :XMENU PowerConfig Tweaks
+CALL :XMENU N/A
+CALL :XMENU N/A
+CALL :XMENU N/A
+CALL :XMENU N/A
+ECHO.
 
 
-set /p web=Type option:
-if "%web%"=="1" goto :SVCMENU
-if "%web%"=="2" goto :SYSTWEAK
-if "%web%"=="3" goto :NETTWEAK
-IF %winversion% == 100 (if "%web%"=="4" goto :RMWINAPPS)
-if "%web%"=="5" goto :POWERTWEAK
-if "%web%"=="6" goto :6
-if "%web%"=="7" goto :7
-if "%web%"=="8" goto :8
-if "%web%"=="9" goto :9
-goto home
+SET /p web=Type option:
+IF "%web%"=="1" GOTO :SVCMENU
+IF "%web%"=="2" GOTO :SYSTWEAK
+IF "%web%"=="3" GOTO :NETTWEAK
+IF %winversion% == 100 (IF "%web%"=="4" GOTO :RMWINAPPS)
+IF "%web%"=="5" GOTO :POWERTWEAK
+IF "%web%"=="6" GOTO :6
+IF "%web%"=="7" GOTO :7
+IF "%web%"=="8" GOTO :8
+IF "%web%"=="9" GOTO :9
+GOTO :HOME
 
 
 :SVCMENU
 CALL :XTITLE SERVICE TWEAKS BY Black Viper - www.blackviper.com
-echo.
-echo Select:
-echo.
-echo 1. Safe
-echo 2. Tweaked
-echo 3. Default
-echo.
+ECHO.
+ECHO Select:
+ECHO.
+ECHO 1. Safe
+ECHO 2. Tweaked
+ECHO 3. Default
+ECHO.
 
 
-set /p web=Type option:
-if "%web%"=="1" goto :SVCSAFE
-if "%web%"=="2" goto :SVCTWEAKED
-if "%web%"=="3" goto :SVCDEFAULT
-
-pause
-goto home
+SET /p web=Type option:
+IF "%web%"=="1" GOTO :SVCSAFE
+IF "%web%"=="2" GOTO :SVCTWEAKED
+IF "%web%"=="3" GOTO :SVCDEFAULT
 
 :SYSTWEAK
 CALL :XTITLE GENERAL SYSTEM TWEAKS
@@ -113,7 +111,7 @@ IF %winversion% GEQ 61 (
 	REG ADD "HKCU\Control Panel\Desktop\WindowMetrics" /F /v MinAnimate /T REG_SZ /D 0 >nul 2>&1
 	REG ADD "HKCU\Software\Microsoft\Windows\DWM" /F /v Max3DWindows /T REG_DWORD /D 4 >nul 2>&1
 )
-goto home
+GOTO :HOME
 
 
 :NETTWEAK
@@ -126,25 +124,25 @@ FOR /F %%A IN ('REG QUERY "HKLM\SYSTEM\CurrentControlSet\Control\Class\{4D36E972
 		SET opt=%%n
 		SET opt=!opt:#=*!
 		REG QUERY "!REGPATH!" /V !opt! >nul 2>&1
-		If NOT ERRORLEVEL 1 REG ADD "!REGPATH!" /F /V !opt! /T REG_SZ /D 0 >nul 2>&1 )
+		IF NOT ERRORLEVEL 1 REG ADD "!REGPATH!" /F /V !opt! /T REG_SZ /D 0 >nul 2>&1 )
 	FOR %%m IN () DO (
 		SET opt=%%m
 		SET opt=!opt:#=*!
 		REG QUERY "!REGPATH!" /V !opt! >nul 2>&1
-		If NOT ERRORLEVEL 1 REG ADD "!REGPATH!" /F /V !opt! /T REG_SZ /D 1 >nul 2>&1 )
+		IF NOT ERRORLEVEL 1 REG ADD "!REGPATH!" /F /V !opt! /T REG_SZ /D 1 >nul 2>&1 )
 	FOR %%o IN (#IPChecksumOffloadIPv4 #TCPChecksumOffloadIPv4 #TCPChecksumOffloadIPv6 #UDPChecksumOffloadIPv4 #UDPChecksumOffloadIPv6) DO (
 		SET opt=%%o
 		SET opt=!opt:#=*!
 		REG QUERY "!REGPATH!" /V !opt! >nul 2>&1
-		If NOT ERRORLEVEL 1 REG ADD "!REGPATH!" /F /V !opt! /T REG_SZ /D 3 >nul 2>&1 )
+		IF NOT ERRORLEVEL 1 REG ADD "!REGPATH!" /F /V !opt! /T REG_SZ /D 3 >nul 2>&1 )
 	REG QUERY "!REGPATH!" /V "*JumboPacket" >nul 2>&1
-	If NOT ERRORLEVEL 1 REG ADD "!REGPATH!" /F /V "*JumboPacket" /T REG_SZ /D 1514 >nul 2>&1
+	IF NOT ERRORLEVEL 1 REG ADD "!REGPATH!" /F /V "*JumboPacket" /T REG_SZ /D 1514 >nul 2>&1
 	REG QUERY "!REGPATH!" /V "WolShutdownLinkSpeed" >nul 2>&1
-	If NOT ERRORLEVEL 1 REG ADD "!REGPATH!" /F /V "WolShutdownLinkSpeed" /T REG_SZ /D 2 >nul 2>&1
+	IF NOT ERRORLEVEL 1 REG ADD "!REGPATH!" /F /V "WolShutdownLinkSpeed" /T REG_SZ /D 2 >nul 2>&1
 	REG QUERY "!REGPATH!" /V "*SSIdleTimeout" >nul 2>&1
-	If NOT ERRORLEVEL 1 REG ADD "!REGPATH!" /F /V "*SSIdleTimeout" /T REG_SZ /D 60 >nul 2>&1
+	IF NOT ERRORLEVEL 1 REG ADD "!REGPATH!" /F /V "*SSIdleTimeout" /T REG_SZ /D 60 >nul 2>&1
 	REG QUERY "!REGPATH!" /V "LogLinkStateEvent" >nul 2>&1
-	If NOT ERRORLEVEL 1 REG ADD "!REGPATH!" /F /V "LogLinkStateEvent" /T REG_SZ /D 16 >nul 2>&1
+	IF NOT ERRORLEVEL 1 REG ADD "!REGPATH!" /F /V "LogLinkStateEvent" /T REG_SZ /D 16 >nul 2>&1
 )
 ::REM Speedguide.net tweaks
 IF %winversion% GEQ 51 (
@@ -158,24 +156,25 @@ IF %winversion% GEQ 51 (
 ) 
 IF %winversion% GEQ 61 (
 	CALL :XECHO Network Throttling Index Gaming Tweak
-	REG ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /F /v NetworkThrottlingIndex /T REG_DWORD /D 0xffffffff >nul 2>&1
+	REG ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /F /v NetworkThrottlingIndex /T REG_DWORD /D 0xFFFFFFFF >nul 2>&1
 	CALL :XECHO System Responsiveness Gaming Tweak
 	REG ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /F /v SystemResponsiveness /T REG_DWORD /D 0 >nul 2>&1
 	CALL :XECHO Turn off LargeSystemCache
 	REG ADD "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /F /v LargeSystemCache /T REG_DWORD /D 0 >nul 2>&1
 	CALL :XECHO Other Common Fixes
-	REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" /F /v autodisconnect /T REG_DWORD /D 0xffffffff >nul 2>&1
+	REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" /F /v autodisconnect /T REG_DWORD /D 0xFFFFFFFF >nul 2>&1
 	REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\lanmanworkstation\parameters" /F /v KeepConn /T REG_DWORD /D 0x7D00 >nul 2>&1
 	CALL :XECHO Set QoS to 0%
 	REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows\Psched" /F /v NonBestEffortLimit /T REG_DWORD /D 0 >nul 2>&1
 )
 IF %winversion% == 61 (
-	NETSH int tcp set heuristics wsh=disabled &NETSH int ip set global taskoffload=enabled
-	FOR %%I IN ("autotuninglevel=normal" "chimney=disabled" "congestionprovider=ctcp" "netdma=disabled" "rss=disable" "timestamps=disabled") DO NETSH int tcp set global %%~I >nul 2>&1
-	FOR %%I IN (tcp udp) DO netsh int ipv4 set dynamicport %%I start=32767 num=32767 >nul 2>&1
+	NETSH int tcp SET heuristics wsh=disabled 
+	NETSH int ip SET global taskoffload=enabled
+	FOR %%I IN ("autotuninglevel=normal" "chimney=disabled" "congestionprovider=ctcp" "netdma=disabled" "rss=disable" "timestamps=disabled") DO NETSH int tcp SET global %%~I >nul 2>&1
+	FOR %%I IN (tcp udp) DO netsh int ipv4 SET dynamicport %%I start=32767 num=32767 >nul 2>&1
 	FOR %%I IN (MaxNegativeCacheTtl NegativeCacheTime NegativeSOACacheTime NetFailureCacheTime) DO REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters" /F /v %%I /T REG_DWORD /D 0 >nul 2>&1
 	REG ADD "HKLM\SOFTWARE\Microsoft\MSMQ\Parameters" /F /v TCPNoDelay /T REG_DWORD /D 1 >nul 2>&1
-	REG ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /F /v NetworkThrottlingIndex /T REG_DWORD /D 0xffffffff >nul 2>&1
+	REG ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /F /v NetworkThrottlingIndex /T REG_DWORD /D 0xFFFFFFFF >nul 2>&1
 	REG ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /F /v SystemResponsiveness /T REG_DWORD /D 0 >nul 2>&1
 	REG ADD "HKLM\SYSTEM\CurrentControlSet\services\LanmanWorkstation\Parameters" /F /v DisableBandwidthThrottling /T REG_DWORD /D 1 >nul 2>&1
 	REG ADD "HKLM\SYSTEM\CurrentControlSet\services\LanmanWorkstation\Parameters" /F /v DisableLargeMtu /T REG_DWORD /D 0 >nul 2>&1
@@ -192,11 +191,11 @@ IF %winversion% == 61 (
 	REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" /F /v TcpTimedWaitDelay /T REG_DWORD /D 0x3c >nul 2>&1
 )
 IF %winversion% == 100 (
-	CALL :XECHO Receive Window Auto-Tuning Level set to normal
+	CALL :XECHO Receive Window Auto-Tuning Level SET to normal
 	powershell "Set-NetTCPSetting -SettingName InternetCustom -AutoTuningLevelLocal Normal" >nul 2>&1
 	CALL :XECHO Disable Windows Scaling heuristics
 	powershell "Set-NetTCPSetting -SettingName InternetCustom -ScalingHeuristics Disabled" >nul 2>&1
-	CALL :XECHO Congestion Control Provider set to CTCP
+	CALL :XECHO Congestion Control Provider SET to CTCP
 	powershell "Set-NetTCPSetting -SettingName InternetCustom -CongestionProvider CTCP" >nul 2>&1
 	CALL :XECHO Disable TCP Chimney Offload
 	powershell "Set-NetOffloadGlobalSetting -Chimney Disabled" >nul 2>&1
@@ -205,7 +204,7 @@ IF %winversion% == 100 (
 	CALL :XECHO Disable TCP 1323 Timestamps
 	powershell "Set-NetTCPSetting -SettingName InternetCustom -Timestamps Disabled" >nul 2>&1
 	CALL :XECHO Enable Direct Cache Access (DCA)
-	netsh int tcp set global dca=enabled >nul 2>&1
+	netsh int tcp SET global dca=enabled >nul 2>&1
 	CALL :XECHO Enable Checksum Offload
 	powershell "Enable-NetAdapterChecksumOffload -Name *" >nul 2>&1
 	CALL :XECHO Enable Receive-Side Scaling State (RSS)
@@ -214,39 +213,39 @@ IF %winversion% == 100 (
 	powershell "Disable-NetAdapterRsc -Name *" >nul 2>&1
 	CALL :XECHO Disable Large Send Offload (LSO)
 	powershell "Disable-NetAdapterLso -Name *" >nul 2>&1
-	CALL :XECHO Max SYN Retransmissions set to 2
+	CALL :XECHO Max SYN Retransmissions SET to 2
 	powershell "Set-NetTCPSetting -SettingName InternetCustom -MaxSynRetransmissions 2" >nul 2>&1
 	CALL :XECHO Disable Non Sack Rtt Resiliency
 	powershell "Set-NetTCPSetting -SettingName InternetCustom -NonSackRttResiliency disabled" >nul 2>&1
 	CALL :XECHO Initial RTO and Min RTO
 	powershell "Set-NetTCPSetting -SettingName InternetCustom -InitialRto 2000" >nul 2>&1
-	powershell "set-NetTCPSetting -SettingName InternetCustom -MinRto 300" >nul 2>&1
+	powershell "SET-NetTCPSetting -SettingName InternetCustom -MinRto 300" >nul 2>&1
 	ECHO.
 	REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\Ndu" /F /v Start /T REG_DWORD /D 4 >nul 2>&1
 )
-pause
-goto home
+PAUSE
+GOTO :HOME
 
 
 :RMWINAPPS
-@echo off
-echo. 
-echo     Remove One Drive? (y/n)
-echo.
-set /p web=Type option:
-if "%web%"=="y" goto :y_od
-if "%web%"=="n" goto :n_od
+@ECHO off
+ECHO. 
+ECHO     Remove One Drive? (y/n)
+ECHO.
+SET /p web=Type option:
+IF "%web%"=="y" GOTO :y_od
+IF "%web%"=="n" GOTO :n_od
 
 :y_od
-echo.
-echo Uninstalling OneDrive
-set x86="%SYSTEMROOT%\System32\OneDriveSetup.exe"
-set x64="%SYSTEMROOT%\SysWOW64\OneDriveSetup.exe"
+ECHO.
+ECHO Uninstalling OneDrive
+SET x86="%SYSTEMROOT%\System32\OneDriveSetup.exe"
+SET x64="%SYSTEMROOT%\SysWOW64\OneDriveSetup.exe"
 taskkill /f /im OneDrive.exe > NUL 2>&1
 ping 127.0.0.1 -n 5 > NUL 2>&1 
-if exist %x64% (
+IF exist %x64% (
 %x64% /uninstall
-) else (
+) ELSE (
 %x86% /uninstall
 )
 ping 127.0.0.1 -n 8 > NUL 2>&1 
@@ -254,24 +253,24 @@ rd "%USERPROFILE%\OneDrive" /Q /S > NUL 2>&1
 rd "C:\OneDriveTemp" /Q /S > NUL 2>&1
 rd "%LOCALAPPDATA%\Microsoft\OneDrive" /Q /S > NUL 2>&1
 rd "%PROGRAMDATA%\Microsoft OneDrive" /Q /S > NUL 2>&1 
-echo.
-echo Removeing OneDrive from the Explorer Side Panel.
+ECHO.
+ECHO Removeing OneDrive from the Explorer Side Panel.
 REG DELETE "HKEY_CLASSES_ROOT\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" /f > NUL 2>&1
 REG DELETE "HKEY_CLASSES_ROOT\Wow6432Node\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" /f > NUL 2>&1
-goto :2nd_part
+GOTO :2nd_part
 :n_od
-goto :2nd_part
+GOTO :2nd_part
 
 :2nd_part
-echo.
-echo  	 Question:
-echo.
-echo 1. Permanently Remove Apps 
-echo 2. Uninstall Apps 
-echo.
-set /p web=Type option:
-if "%web%"=="1" goto :PRA
-if "%web%"=="2" goto :UA
+ECHO.
+ECHO  	 Question:
+ECHO.
+ECHO 1. Permanently Remove Apps 
+ECHO 2. Uninstall Apps 
+ECHO.
+SET /p web=Type option:
+IF "%web%"=="1" GOTO :PRA
+IF "%web%"=="2" GOTO :UA
 :PRA
 powershell "Get-appxprovisionedpackage -online | Where DisplayName -like *BingFinance* | remove-appxprovisionedpackage -online"
 powershell "Get-appxprovisionedpackage -online | Where DisplayName -like *BingNews* | remove-appxprovisionedpackage -online"
@@ -295,8 +294,8 @@ powershell "Get-appxprovisionedpackage -online | Where DisplayName -like *XboxAp
 powershell "Get-appxprovisionedpackage -online | Where DisplayName -like *ZuneMusic* | remove-appxprovisionedpackage -online"
 powershell "Get-appxprovisionedpackage -online | Where DisplayName -like *ZuneVideo* | remove-appxprovisionedpackage -online"
 powershell "Get-appxprovisionedpackage -online | Where DisplayName -like *3DBuilder* | remove-appxprovisionedpackage -online"
-pause
-goto dh
+PAUSE
+GOTO dh
 :UA
 powershell "Get-AppxPackage *BingFinance* | Remove-AppxPackage"
 powershell "Get-AppxPackage *BingNews* | Remove-AppxPackage"
@@ -320,158 +319,158 @@ powershell "Get-AppxPackage *XboxApp* | Remove-AppxPackage"
 powershell "Get-AppxPackage *ZuneMusic* | Remove-AppxPackage"
 powershell "Get-AppxPackage *ZuneVideo* | Remove-AppxPackage"
 powershell "Get-AppxPackage *3DBuilder* | Remove-AppxPackage"
-pause
+PAUSE
 :dh
-echo.
-echo  	 Disable Hibernation? (y/n)
-echo.
-set /p web=Type option:
-if "%web%"=="y" goto :y_dh
-if "%web%"=="n" goto :n_dh
+ECHO.
+ECHO  	 Disable Hibernation? (y/n)
+ECHO.
+SET /p web=Type option:
+IF "%web%"=="y" GOTO :y_dh
+IF "%web%"=="n" GOTO :n_dh
 :y_dh
-@echo on
+@ECHO on
 powercfg -h off
-@echo off
-goto 3rd_part
+@ECHO off
+GOTO 3rd_part
 :n_dh
-goto 3rd_part
+GOTO 3rd_part
 
 :3rd_part
-goto home
+GOTO :HOME
 
 
 :POWERTWEAK
 CALL :XTITLE POWERCONFIG TWEAKS
-CALL :Xecho Backup Stock Settings 
+CALL :XECHO Backup Stock Settings 
 powercfg /qh > powerconfig.txt
 
-CALL :Xecho Activate High Performance Scheme
-Powercfg -setactive scheme_min
+CALL :XECHO Activate High Performance Scheme
+powercfg -setactive scheme_min
 
-CALL :Xecho Processor performance increase threshold / Schwellenwert zum Erhöhen der Prozessorleistung
-echo Optimized Value: 0%
+CALL :XECHO Processor performance increase threshold / Schwellenwert zum Erhöhen der Prozessorleistung
+ECHO Optimized Value: 0%
 powercfg -attributes SUB_PROCESSOR 06cadf0e-64ed-448a-8927-ce7bf90eb35d -ATTRIB_HIDE
-Powercfg -setacvalueindex scheme_current sub_processor 06cadf0e-64ed-448a-8927-ce7bf90eb35d 0
+powercfg -setacvalueindex scheme_current sub_processor 06cadf0e-64ed-448a-8927-ce7bf90eb35d 0
 
 
-CALL :Xecho Processor performance decrease threshold / Schwellenwert zum Reduzieren der Prozessorleistung
-echo Optimized Value: 100%
+CALL :XECHO Processor performance decrease threshold / Schwellenwert zum Reduzieren der Prozessorleistung
+ECHO Optimized Value: 100%
 powercfg -attributes SUB_PROCESSOR 12a0ab44-fe28-4fa9-b3bd-4b64f44960a6 -ATTRIB_HIDE
-Powercfg -setacvalueindex scheme_current sub_processor 12a0ab44-fe28-4fa9-b3bd-4b64f44960a6 100
+powercfg -setacvalueindex scheme_current sub_processor 12a0ab44-fe28-4fa9-b3bd-4b64f44960a6 100
 
 
-CALL :Xecho Processor performance decrease policy / Prozessorleistung - Reduzierungsrichtlinie
-echo Optimized Value: Rocket
+CALL :XECHO Processor performance decrease policy / Prozessorleistung - Reduzierungsrichtlinie
+ECHO Optimized Value: Rocket
 powercfg -attributes SUB_PROCESSOR 40fbefc7-2e9d-4d25-a185-0cfd8574bac6 -ATTRIB_HIDE
-Powercfg -setacvalueindex scheme_current sub_processor 40fbefc7-2e9d-4d25-a185-0cfd8574bac6 2
-Powercfg -setactive scheme_current
+powercfg -setacvalueindex scheme_current sub_processor 40fbefc7-2e9d-4d25-a185-0cfd8574bac6 2
+powercfg -setactive scheme_current
 
-CALL :Xecho Processor performance increase policy / Prozessorleistung - Erhöhungsrichtlinie
-echo Optimized Value: Ideal
+CALL :XECHO Processor performance increase policy / Prozessorleistung - Erhöhungsrichtlinie
+ECHO Optimized Value: Ideal
 powercfg -attributes SUB_PROCESSOR 465e1f50-b610-473a-ab58-00d1077dc418 -ATTRIB_HIDE
-Powercfg -setacvalueindex scheme_current sub_processor 465e1f50-b610-473a-ab58-00d1077dc418 0
+powercfg -setacvalueindex scheme_current sub_processor 465e1f50-b610-473a-ab58-00d1077dc418 0
 
-CALL :Xecho Processor idle demote threshold / Prozessorleerlauf - Schwellenwert für Herabstufung
-echo Optimized Value: 0%
+CALL :XECHO Processor idle demote threshold / Prozessorleerlauf - Schwellenwert für Herabstufung
+ECHO Optimized Value: 0%
 powercfg -attributes SUB_PROCESSOR 4b92d758-5a24-4851-a470-815d78aee119 -ATTRIB_HIDE
-Powercfg -setacvalueindex scheme_current sub_processor 4b92d758-5a24-4851-a470-815d78aee119 0
+powercfg -setacvalueindex scheme_current sub_processor 4b92d758-5a24-4851-a470-815d78aee119 0
 
 
-CALL :Xecho Processor idle promote threshold / Prozessorleerlauf - Schwellenwert für Heraufstufung
-echo Optimized Value: 0%
+CALL :XECHO Processor idle promote threshold / Prozessorleerlauf - Schwellenwert für Heraufstufung
+ECHO Optimized Value: 0%
 powercfg -attributes SUB_PROCESSOR 7b224883-b3cc-4d79-819f-8374152cbe7c -ATTRIB_HIDE
-Powercfg -setacvalueindex scheme_current sub_processor 7b224883-b3cc-4d79-819f-8374152cbe7c 0
+powercfg -setacvalueindex scheme_current sub_processor 7b224883-b3cc-4d79-819f-8374152cbe7c 0
 
 
-CALL :Xecho Processor performance core parking over utilization threshold / Prozessorleistung: Parken von Kernen - Schwellenwert für übermäßige Kernnutzung
-echo Optimized Value: 100%
+CALL :XECHO Processor performance core parking over utilization threshold / Prozessorleistung: Parken von Kernen - Schwellenwert für übermäßige Kernnutzung
+ECHO Optimized Value: 100%
 powercfg -attributes SUB_PROCESSOR 943c8cb6-6f93-4227-ad87-e9a3feec08d1 -ATTRIB_HIDE
-Powercfg -setacvalueindex scheme_current sub_processor 943c8cb6-6f93-4227-ad87-e9a3feec08d1 100
+powercfg -setacvalueindex scheme_current sub_processor 943c8cb6-6f93-4227-ad87-e9a3feec08d1 100
 
-CALL :Xecho Processor performance boost mode / Leistungssteigerungsmodus für Prozessoren
-echo Optimized Value: Enabled
+CALL :XECHO Processor performance boost mode / Leistungssteigerungsmodus für Prozessoren
+ECHO Optimized Value: Enabled
 powercfg -attributes SUB_PROCESSOR be337238-0d82-4146-a960-4f3749d470c7 -ATTRIB_HIDE
 powercfg -setacvalueindex scheme_current sub_processor be337238-0d82-4146-a960-4f3749d470c7 1
 
-CALL :Xecho Processor idle disable / Prozessorleerlauf deaktivieren
-echo Optimized Value: idle disabled
+CALL :XECHO Processor idle disable / Prozessorleerlauf deaktivieren
+ECHO Optimized Value: idle disabled
 powercfg -attributes SUB_PROCESSOR 5d76a2ca-e8c0-402f-a133-2158492d58ad -ATTRIB_HIDE
 powercfg -setacvalueindex scheme_current sub_processor 5d76a2ca-e8c0-402f-a133-2158492d58ad 1
 
-CALL :Xecho Allow Throttle States / Drosselungszustände zulassen
-echo Optimized Value: Disabled
+CALL :XECHO Allow Throttle States / Drosselungszustände zulassen
+ECHO Optimized Value: Disabled
 powercfg -attributes SUB_PROCESSOR 3b04d4fd-1cc7-4f23-ab1c-d1337819c4bb -ATTRIB_HIDE
 powercfg -setacvalueindex scheme_current sub_processor 3b04d4fd-1cc7-4f23-ab1c-d1337819c4bb 0
 
-CALL :Xecho Upper bound for processor performance throttling / Maximum processor state / Drosselungszustände zulassen
-echo Optimized Value: 100%
+CALL :XECHO Upper bound for processor performance throttling / Maximum processor state / Drosselungszustände zulassen
+ECHO Optimized Value: 100%
 powercfg -attributes SUB_PROCESSOR bc5038f7-23e0-4960-96da-33abaf5935ec -ATTRIB_HIDE
-Powercfg -setacvalueindex scheme_current sub_processor bc5038f7-23e0-4960-96da-33abaf5935ec 100
+powercfg -setacvalueindex scheme_current sub_processor bc5038f7-23e0-4960-96da-33abaf5935ec 100
 
-CALL :Xecho Lower bound for processor performance throttling / Minimum processor state / Drosselungszustände zulassen
-echo Optimized Value: 100%
+CALL :XECHO Lower bound for processor performance throttling / Minimum processor state / Drosselungszustände zulassen
+ECHO Optimized Value: 100%
 powercfg -attributes SUB_PROCESSOR 893dee8e-2bef-41e0-89c6-b55d0929964c -ATTRIB_HIDE
-Powercfg -setacvalueindex scheme_current sub_processor 893dee8e-2bef-41e0-89c6-b55d0929964c 100
+powercfg -setacvalueindex scheme_current sub_processor 893dee8e-2bef-41e0-89c6-b55d0929964c 100
 
-CALL :Xecho Core-Parking
-echo Processor performance core parking min cores
+CALL :XECHO Core-Parking
+ECHO Processor performance core parking min cores
 powercfg -attributes SUB_PROCESSOR 0cc5b647-c1df-4637-891a-dec35c318583 -ATTRIB_HIDE
-Powercfg -setacvalueindex scheme_current sub_processor 0cc5b647-c1df-4637-891a-dec35c318583 100
+powercfg -setacvalueindex scheme_current sub_processor 0cc5b647-c1df-4637-891a-dec35c318583 100
 
-echo Core-Parking for Skylake
-echo Processor performance autonomous mode / Autonomer Modus für die Prozessorleistung
+ECHO Core-Parking for Skylake
+ECHO Processor performance autonomous mode / Autonomer Modus für die Prozessorleistung
 powercfg -attributes SUB_PROCESSOR 8baa4a8a-14c6-4451-8e8b-14bdbd197537 -ATTRIB_HIDE
-Powercfg -setacvalueindex scheme_current sub_processor 8baa4a8a-14c6-4451-8e8b-14bdbd197537 1
-echo Processor energy performance preference policy / Richtlinie für die bevorzugte Prozessorenergieeffizienz
+powercfg -setacvalueindex scheme_current sub_processor 8baa4a8a-14c6-4451-8e8b-14bdbd197537 1
+ECHO Processor energy performance preference policy / Richtlinie für die bevorzugte Prozessorenergieeffizienz
 powercfg -attributes SUB_PROCESSOR 36687f9e-e3a5-4dbf-b1dc-15eb381c6863 -ATTRIB_HIDE
-Powercfg -setacvalueindex scheme_current sub_processor 36687f9e-e3a5-4dbf-b1dc-15eb381c6863 0
-echo Processor duty cycling / Prozessor-Aussetzbetrieb
+powercfg -setacvalueindex scheme_current sub_processor 36687f9e-e3a5-4dbf-b1dc-15eb381c6863 0
+ECHO Processor duty cycling / Prozessor-Aussetzbetrieb
 powercfg -attributes SUB_PROCESSOR 4e4450b3-6179-4e91-b8f1-5bb9938f81a1 -ATTRIB_HIDE
-Powercfg -setacvalueindex scheme_current sub_processor 4e4450b3-6179-4e91-b8f1-5bb9938f81a1 0
-echo Processor autonomous activity window / Fenster für die autonome Prozessoraktivität
+powercfg -setacvalueindex scheme_current sub_processor 4e4450b3-6179-4e91-b8f1-5bb9938f81a1 0
+ECHO Processor autonomous activity window / Fenster für die autonome Prozessoraktivität
 powercfg -attributes SUB_PROCESSOR cfeda3d0-7697-4566-a922-a9086cd49dfa -ATTRIB_HIDE
-Powercfg -setacvalueindex scheme_current sub_processor cfeda3d0-7697-4566-a922-a9086cd49dfa 30000
+powercfg -setacvalueindex scheme_current sub_processor cfeda3d0-7697-4566-a922-a9086cd49dfa 30000
 
-CALL :Xecho Save new settings
-Powercfg -setactive scheme_current
-goto home
+CALL :XECHO Save new settings
+powercfg -setactive scheme_current
+GOTO :HOME
 
 
 :6 
-goto home
+GOTO :HOME
 
 
 :7 
-goto home
+GOTO :HOME
 
 
 :8 
-goto home
+GOTO :HOME
 
 
 :9 
-goto home
+GOTO :HOME
 
 
 :10
-goto home
+GOTO :HOME
 
 :::::::::::::::::::::::::::::::::
 :: WINDOWS SVC BY Black Viper  ::
 :::::::::::::::::::::::::::::::::
 :SVCSAFE
 IF %winversion% == 100 (
-	echo.
-	echo Select:
-	echo.
-	echo 1. DESKTOP
-	echo 2. LAPTOP or TABLET
-	echo.
+	ECHO.
+	ECHO Select:
+	ECHO.
+	ECHO 1. DESKTOP
+	ECHO 2. LAPTOP or TABLET
+	ECHO.
 
 
-	set /p web=Type option:
-	if "%web%"=="1" goto :SVCSAFEDESK
-	if "%web%"=="2" goto :SVCSAFELAPTAB
+	SET /p web=Type option:
+	IF "%web%"=="1" GOTO :SVCSAFEDESK
+	IF "%web%"=="2" GOTO :SVCSAFELAPTAB
 )
 IF %winversion% == 61 (
 	::Automatic
@@ -480,7 +479,7 @@ IF %winversion% == 61 (
 	ShellHWDetection sppsvc SysMain SENS Schedule lmhosts Themes ProfSvc AudioSrv 
 	AudioEndpointBuilder WinDefend EventLog MpsSvc FontCache Winmgmt wuauserv LanmanWorkstation) DO (
 		REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
-		If NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 2 >nul 2>&1)
+		IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 2 >nul 2>&1)
 	::Manual
 	FOR %%I IN (AxInstSV SensrSvc AeLookupSvc AppIDSvc Appinfo ALG BITS BDESVC wbengine KeyIso 
 	COMSysApp Browser VaultSvc WdiServiceHost WdiSystemHost defragsvc MSDTC EFS EapHost Fax fdPHost 
@@ -492,15 +491,15 @@ IF %winversion% == 61 (
 	ehRecvr ehSched TrustedInstaller FontCache3.0.0.0 WinRM W32Time WinHttpAutoProxySvc dot3svc Wlansvc 
 	wmiApSrv WwanSvc) DO (
 		REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
-		If NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 3 >nul 2>&1)
+		IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 3 >nul 2>&1)
 	::Disabled
 	FOR %%I IN (AppMgmt bthserv PeerDistSvc CertPropSvc TrkWks SharedAccess iphlpsvc Mcx2Svc MSiSCSI 
 	NetTcpPortSharing Netlogon napagent CscService WPCSvc RpcLocator RemoteRegistry RemoteAccess 
 	SCardSvr SCPolicySvc SNMPTRAP StorSvc wcncsvc WMPNetworkSvc WSearch) DO (
 		REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
-		If NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 4 >nul 2>&1)
+		IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 4 >nul 2>&1)
 )
-goto home
+GOTO :HOME
 :SVCTWEAKED
 IF %winversion% == 100 (
 	::Automatic
@@ -511,7 +510,7 @@ IF %winversion% == 100 (
 	UserManager ProfSvc AudioSrv AudioEndpointBuilder Wcmsvc WinDefend SecurityHealthService 
 	EventLog MpsSvc FontCache Winmgmt WpnService WSearch LanmanWorkstation) DO (
 		REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
-		If NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 2 >nul 2>&1)
+		IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 2 >nul 2>&1)
 	::Manual
 	FOR %%I IN (AxInstSV AppReadiness AppIDSvc Appinfo AppXSVC BDESVC wbengine ClipSVC KeyIso 
 	COMSysApp Browser PimIndexMaintenanceSvc_????? VaultSvc DsSvc DeviceAssociationService 
@@ -527,7 +526,7 @@ IF %winversion% == 100 (
 	TrustedInstaller WpnUserService_????? W32Time wuauserv WinHttpAutoProxySvc dot3svc WlanSvc 
 	wmiApSrv XboxGipSvc) DO (
 		REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
-		If NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 3 >nul 2>&1)
+		IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 3 >nul 2>&1)
 	::Disabled
 	FOR %%I IN (AJRouter ALG AppMgmt tzautoupdate BthHFSrv bthserv PeerDistSvc CertPropSvc 
 	NfsClnt dmwappushsvc MapsBroker lfsvc HvHost vmickvpexchange vmicguestinterface vmicshutdown 
@@ -538,7 +537,7 @@ IF %winversion% == 100 (
 	SNMPTRAP TabletInputService UevAgentService WebClient WFDSConSvc FrameServer wcncsvc wisvc 
 	WMPNetworkSvc icssvc WinRM WwanSvc XblAuthManager XblGameSave XboxNetApiSvc) DO (
 		REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
-		If NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 4 >nul 2>&1)
+		IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 4 >nul 2>&1)
 )
 IF %winversion% == 61 (
 	::Automatic
@@ -547,7 +546,7 @@ IF %winversion% == 61 (
 	sppsvc SysMain SENS Schedule lmhosts Themes ProfSvc AudioSrv AudioEndpointBuilder WinDefend 
 	EventLog MpsSvc FontCache Winmgmt wuauserv LanmanWorkstation) DO (
 		REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
-		If NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 2 >nul 2>&1)
+		IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 2 >nul 2>&1)
 	::Manual
 	FOR %%I IN (AeLookupSvc AppIDSvc Appinfo BITS wbengine KeyIso COMSysApp Browser defragsvc 
 	MSDTC EapHost HomeGroupListener HomeGroupProvider IKEEXT PolicyAgent KtmRm clr_optimization_v2.0.50727 
@@ -555,7 +554,7 @@ IF %winversion% == 61 (
 	THREADORDER upnphost vds VSS SDRSVC wudfsvc Wecsvc StiSvc msiserver TrustedInstaller FontCache3.0.0.0 
 	W32Time dot3svc Wlansvc wmiApSrv) DO (
 		REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
-		If NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 3 >nul 2>&1)
+		IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 3 >nul 2>&1)
 	::Disabled
 	FOR %%I IN (AxInstSV SensrSvc ALG AppMgmt BDESVC bthserv PeerDistSvc CertPropSvc VaultSvc DPS WdiServiceHost 
 	WdiSystemHost TrkWks EFS Fax fdPHost FDResPub hkmsvc hidserv UI0Detect SharedAccess iphlpsvc lltdsvc Mcx2Svc 
@@ -564,15 +563,15 @@ IF %winversion% == 61 (
 	SCardSvr SCPolicySvc SNMPTRAP StorSvc TabletInputService TBS WebClient WbioSrvc idsvc WcsPlugInService wcncsvc 
 	WerSvc ehRecvr ehSched WMPNetworkSvc WinRM WSearch WinHttpAutoProxySvc WwanSvc) DO (
 		REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
-		If NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 4 >nul 2>&1)
+		IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 4 >nul 2>&1)
 )
-goto home
+GOTO :HOME
 :SVCDEFAULT
+ECHO.
+ECHO SET DEFAULT SERVICES FOR %winedition%
+PAUSE
 IF %winversion% == 100 (
-	ECHO.
-	ECHO SET DEFAULT SERVICES FOR %winedition%
-	PAUSE
-	if %winedition% == "Windows 10 Home" (
+	IF "%winedition%" == "Windows 10 Home" (
 		::Automatic
 		FOR %%I IN (BrokerInfrastructure BFE EventSystem CDPSvc CDPUserSvc_????? DiagTrack CoreMessagingRegistrar 
 		CryptSvc DusmSvc DcomLaunch DoSvc Dhcp DPS TrkWks Dnscache MapsBroker gpsvc iphlpsvc LSM NlaSvc nsi 
@@ -581,7 +580,7 @@ IF %winversion% == 100 (
 		AudioSrv AudioEndpointBuilder Wcmsvc WinDefend SecurityHealthService EventLog MpsSvc FontCache 
 		Winmgmt WpnService WSearch WlanSvc LanmanWorkstation) DO (
 			REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
-			If NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 2 >nul 2>&1)
+			IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 2 >nul 2>&1)
 		::Manual
 		FOR %%I IN (AxInstSV AJRouter AppReadiness AppIDSvc Appinfo ALG AppXSVC BITS BDESVC wbengine BthHFSrv 
 		bthserv CertPropSvc ClipSVC KeyIso COMSysApp Browser PimIndexMaintenanceSvc_????? VaultSvc DsSvc 
@@ -600,13 +599,13 @@ IF %winversion% == 100 (
 		LicenseManager WMPNetworkSvc icssvc TrustedInstaller WpnUserService_????? WinRM W32Time wuauserv WinHttpAutoProxySvc 
 		dot3svc wmiApSrv workfolderssvc WwanSvc XboxGipSvc XblAuthManager XblGameSave XboxNetApiSvc) DO (
 			REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
-			If NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 3 >nul 2>&1)
+			IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 3 >nul 2>&1)
 		::Disabled
 		FOR %%I IN (tzautoupdate NetTcpPortSharing RemoteRegistry RemoteAccess shpamsvc SCardSvr) DO (
 			REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
-			If NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 4 >nul 2>&1)
+			IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 4 >nul 2>&1)
 	)
-	if %winedition% == "Windows 10 Pro" (
+	IF "%winedition%" == "Windows 10 Pro" (
 		::Automatic
 		FOR %%I IN (BrokerInfrastructure BFE EventSystem CDPSvc CDPUserSvc_????? DiagTrack CoreMessagingRegistrar 
 		CryptSvc DusmSvc DcomLaunch DoSvc Dhcp DPS TrkWks Dnscache MapsBroker gpsvc iphlpsvc LSM NlaSvc nsi Power
@@ -614,7 +613,7 @@ IF %winversion% == 100 (
 		SENS SystemEventsBroker Schedule Themes tiledatamodelsvc UserManager ProfSvc AudioSrv AudioEndpointBuilder 
 		Wcmsvc WinDefend SecurityHealthService EventLog MpsSvc FontCache Winmgmt WpnService WSearch WlanSvc LanmanWorkstation) DO (
 			REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
-			If NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 2 >nul 2>&1)
+			IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 2 >nul 2>&1)
 		::Manual
 		FOR %%I IN (AxInstSV AJRouter AppReadiness AppIDSvc Appinfo ALG AppMgmt AppXSVC BITS BDESVC wbengine BthHFSrv 
 		bthserv PeerDistSvc CertPropSvc ClipSVC KeyIso COMSysApp Browser PimIndexMaintenanceSvc_????? VaultSvc DsSvc 
@@ -632,17 +631,164 @@ IF %winversion% == 100 (
 		WMPNetworkSvc icssvc TrustedInstaller WpnUserService_????? WinRM W32Time wuauserv WinHttpAutoProxySvc dot3svc wmiApSrv 
 		workfolderssvc WwanSvc XboxGipSvc XblAuthManager XblGameSave XboxNetApiSvc) DO (
 			REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
-			If NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 3 >nul 2>&1)
+			IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 3 >nul 2>&1)
 		::Disabled
 		FOR %%I IN (tzautoupdate AppVClient NetTcpPortSharing RemoteRegistry RemoteAccess shpamsvc SCardSvr UevAgentService) DO (
 			REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
-			If NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 4 >nul 2>&1)
+			IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 4 >nul 2>&1)
 	)
 )
 IF %winversion% == 61 (
-	
+	IF "%winedition%" == "Windows 7 Starter" (
+		::Automatic
+		FOR %%I IN (BFE EventSystem CryptSvc DcomLaunch UxSms Dhcp DPS TrkWks Dnscache FDResPub gpsvc iphlpsvc
+		MMCSS NlaSvc nsi PlugPlay Power Spooler RpcSs RpcEptMapper SamSs wscsvc LanmanServer ShellHWDetection
+		sppsvc SysMain SENS Schedule lmhosts Themes ProfSvc AudioSrv AudioEndpointBuilder WinDefend EventLog
+		MpsSvc FontCache Winmgmt WSearch wuauserv LanmanWorkstation) DO (
+			REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
+			IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 2 >nul 2>&1)
+		::Manual
+		FOR %%I IN (AxInstSV AeLookupSvc AppIDSvc Appinfo ALG BITS BDESVC wbengine bthserv CertPropSvc KeyIso 
+		COMSysApp Browser VaultSvc WdiServiceHost WdiSystemHost defragsvc MSDTC EFS EapHost Fax fdPHost hkmsvc 
+		HomeGroupListener HomeGroupProvider hidserv IKEEXT UI0Detect PolicyAgent KtmRm lltdsvc clr_optimization_v2.0.50727 
+		MSiSCSI swprv Netlogon napagent Netman netprofm WPCSvc PNRPsvc p2psvc p2pimsvc pla IPBusEnum PNRPAutoReg 
+		WPDBusEnum wercplsupport PcaSvc ProtectedStorage QWAVE RasAuto RasMan SessionEnv TermService RpcLocator 
+		RemoteRegistry seclogon SstpSvc SCardSvr SCPolicySvc SNMPTRAP sppuinotify SSDPSRV TabletInputService 
+		TapiSrv THREADORDER TBS upnphost vds VSS WebClient SDRSVC WbioSrvc idsvc WcsPlugInService wcncsvc wudfsvc 
+		WerSvc Wecsvc StiSvc msiserver WMPNetworkSvc TrustedInstaller FontCache3.0.0.0 WinRM W32Time WinHttpAutoProxySvc 
+		dot3svc Wlansvc wmiApSrv WwanSvc) DO (
+			REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
+			IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 3 >nul 2>&1)
+		::Disabled
+		FOR %%I IN (SharedAccess NetTcpPortSharing RemoteAccess) DO (
+			REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
+			IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 4 >nul 2>&1)
+	)
+	IF "%winedition%" == "Windows 7 Home Basic" (
+		::Automatic
+		FOR %%I IN (BFE EventSystem CryptSvc DcomLaunch UxSms Dhcp DPS TrkWks Dnscache FDResPub gpsvc iphlpsvc 
+		MMCSS NlaSvc nsi PlugPlay Power Spooler RpcSs RpcEptMapper SamSs wscsvc LanmanServer ShellHWDetection 
+		sppsvc SysMain SENS Schedule lmhosts Themes ProfSvc AudioSrv AudioEndpointBuilder WinDefend EventLog 
+		MpsSvc FontCache Winmgmt WSearch wuauserv LanmanWorkstation) DO (
+			REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
+			IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 2 >nul 2>&1)
+		::Manual
+		FOR %%I IN (AxInstSV SensrSvc AeLookupSvc AppIDSvc Appinfo ALG BITS BDESVC wbengine bthserv CertPropSvc 
+		KeyIso COMSysApp Browser VaultSvc WdiServiceHost WdiSystemHost defragsvc MSDTC EFS EapHost Fax fdPHost 
+		hkmsvc HomeGroupListener HomeGroupProvider hidserv IKEEXT UI0Detect PolicyAgent KtmRm lltdsvc clr_optimization_v2.0.50727 
+		MSiSCSI swprv Netlogon napagent Netman netprofm WPCSvc PNRPsvc p2psvc p2pimsvc pla IPBusEnum PNRPAutoReg WPDBusEnum 
+		wercplsupport PcaSvc ProtectedStorage QWAVE RasAuto RasMan SessionEnv TermService RpcLocator RemoteRegistry seclogon 
+		SstpSvc SCardSvr SCPolicySvc SNMPTRAP sppuinotify SSDPSRV TabletInputService TapiSrv THREADORDER TBS upnphost vds 
+		VSS WebClient SDRSVC WbioSrvc idsvc WcsPlugInService wcncsvc wudfsvc WerSvc Wecsvc StiSvc msiserver WMPNetworkSvc 
+		TrustedInstaller FontCache3.0.0.0 WinRM W32Time WinHttpAutoProxySvc dot3svc Wlansvc wmiApSrv WwanSvc) DO (
+			REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
+			IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 3 >nul 2>&1)
+		::Disabled
+		FOR %%I IN (SharedAccess NetTcpPortSharing RemoteAccess) DO (
+			REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
+			IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 4 >nul 2>&1)
+	)
+	IF "%winedition%" == "Windows 7 Home Premium" (
+		::Automatic
+		FOR %%I IN (BFE EventSystem CryptSvc DcomLaunch UxSms Dhcp DPS TrkWks Dnscache FDResPub gpsvc iphlpsvc MMCSS 
+		NlaSvc nsi PlugPlay Power Spooler RpcSs RpcEptMapper SamSs wscsvc LanmanServer ShellHWDetection sppsvc SysMain 
+		SENS Schedule lmhosts Themes ProfSvc AudioSrv AudioEndpointBuilder WinDefend EventLog MpsSvc FontCache Winmgmt 
+		WSearch wuauserv LanmanWorkstation) DO (
+			REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
+			IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 2 >nul 2>&1)
+		::Manual
+		FOR %%I IN (AxInstSV SensrSvc AeLookupSvc AppIDSvc Appinfo ALG BITS BDESVC wbengine bthserv CertPropSvc KeyIso 
+		COMSysApp Browser VaultSvc WdiServiceHost WdiSystemHost defragsvc MSDTC EFS EapHost Fax fdPHost hkmsvc HomeGroupListener 
+		HomeGroupProvider hidserv IKEEXT UI0Detect PolicyAgent KtmRm lltdsvc clr_optimization_v2.0.50727 MSiSCSI swprv Netlogon 
+		napagent Netman netprofm WPCSvc PNRPsvc p2psvc p2pimsvc pla IPBusEnum PNRPAutoReg WPDBusEnum wercplsupport PcaSvc 
+		ProtectedStorage QWAVE RasAuto RasMan SessionEnv TermService RpcLocator RemoteRegistry seclogon SstpSvc SCardSvr SCPolicySvc 
+		SNMPTRAP sppuinotify SSDPSRV TabletInputService TapiSrv THREADORDER TBS upnphost vds VSS WebClient SDRSVC WbioSrvc idsvc 
+		WcsPlugInService wcncsvc wudfsvc WerSvc Wecsvc StiSvc msiserver ehRecvr ehSched WMPNetworkSvc TrustedInstaller 
+		FontCache3.0.0.0 WinRM W32Time WinHttpAutoProxySvc dot3svc Wlansvc wmiApSrv WwanSvc) DO (
+			REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
+			IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 3 >nul 2>&1)
+		::Disabled
+		FOR %%I IN (SharedAccess Mcx2Svc NetTcpPortSharing RemoteAccess) DO (
+			REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
+			IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 4 >nul 2>&1)
+	)
+	IF "%winedition%" == "Windows 7 Professional" (
+		::Automatic
+		FOR %%I IN (BFE EventSystem CryptSvc DcomLaunch UxSms Dhcp DPS TrkWks Dnscache FDResPub gpsvc iphlpsvc 
+		clr_optimization_v2.0.50727 MMCSS NlaSvc nsi CscService PlugPlay Power Spooler RpcSs RpcEptMapper SamSs 
+		wscsvc LanmanServer ShellHWDetection sppsvc SysMain SENS Schedule lmhosts Themes ProfSvc AudioSrv 
+		AudioEndpointBuilder WinDefend EventLog MpsSvc FontCache Winmgmt WSearch wuauserv LanmanWorkstation) DO (
+			REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
+			IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 2 >nul 2>&1)
+		::Manual
+		FOR %%I IN (AxInstSV SensrSvc AeLookupSvc AppIDSvc Appinfo ALG AppMgmt BITS BDESVC wbengine bthserv 
+		PeerDistSvc CertPropSvc KeyIso COMSysApp Browser VaultSvc WdiServiceHost WdiSystemHost defragsvc MSDTC
+		EFS EapHost Fax fdPHost hkmsvc HomeGroupListener HomeGroupProvider hidserv IKEEXT UI0Detect PolicyAgent 
+		KtmRm lltdsvc MSiSCSI swprv Netlogon napagent Netman netprofm WPCSvc PNRPsvc p2psvc p2pimsvc pla IPBusEnum 
+		PNRPAutoReg WPDBusEnum wercplsupport PcaSvc ProtectedStorage QWAVE RasAuto RasMan SessionEnv TermService 
+		UmRdpService RpcLocator RemoteRegistry seclogon SstpSvc SCardSvr SCPolicySvc SNMPTRAP sppuinotify SSDPSRV 
+		StorSvc TabletInputService TapiSrv THREADORDER TBS upnphost vds VSS WebClient SDRSVC WbioSrvc idsvc 
+		WcsPlugInService wcncsvc wudfsvc WerSvc Wecsvc StiSvc msiserver ehRecvr ehSched WMPNetworkSvc TrustedInstaller 
+		FontCache3.0.0.0 WinRM W32Time WinHttpAutoProxySvc dot3svc Wlansvc wmiApSrv WwanSvc) DO (
+			REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
+			IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 3 >nul 2>&1)
+		::Disabled
+		FOR %%I IN (SharedAccess Mcx2Svc NetTcpPortSharing RemoteAccess) DO (
+			REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
+			IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 4 >nul 2>&1)
+	)
+	IF "%winedition%" == "Windows 7 Ultimate" (
+		::Automatic
+		FOR %%I IN (BFE EventSystem CryptSvc DcomLaunch UxSms Dhcp DPS TrkWks Dnscache FDResPub gpsvc iphlpsvc 
+		MMCSS NlaSvc nsi CscService PlugPlay Power Spooler RpcSs RpcEptMapper SamSs wscsvc LanmanServer ShellHWDetection 
+		sppsvc SysMain SENS Schedule lmhosts Themes ProfSvc AudioSrv AudioEndpointBuilder WinDefend EventLog MpsSvc 
+		FontCache Winmgmt WSearch wuauserv LanmanWorkstation) DO (
+			REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
+			IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 2 >nul 2>&1)
+		::Manual
+		FOR %%I IN (AxInstSV SensrSvc AeLookupSvc AppIDSvc Appinfo ALG AppMgmt BITS BDESVC wbengine bthserv 
+		PeerDistSvc CertPropSvc KeyIso COMSysApp Browser VaultSvc WdiServiceHost WdiSystemHost defragsvc MSDTC 
+		EFS EapHost Fax fdPHost hkmsvc HomeGroupListener HomeGroupProvider hidserv IKEEXT UI0Detect PolicyAgent 
+		KtmRm lltdsvc clr_optimization_v2.0.50727 MSiSCSI swprv Netlogon napagent Netman netprofm WPCSvc PNRPsvc 
+		p2psvc p2pimsvc pla IPBusEnum PNRPAutoReg WPDBusEnum wercplsupport PcaSvc ProtectedStorage QWAVE RasAuto 
+		RasMan SessionEnv TermService UmRdpService RpcLocator RemoteRegistry seclogon SstpSvc SCardSvr SCPolicySvc 
+		SNMPTRAP sppuinotify SSDPSRV TabletInputService TapiSrv THREADORDER TBS upnphost vds VSS WebClient SDRSVC 
+		WbioSrvc idsvc WcsPlugInService wcncsvc wudfsvc WerSvc Wecsvc StiSvc msiserver ehRecvr ehSched WMPNetworkSvc 
+		TrustedInstaller FontCache3.0.0.0 WinRM W32Time WinHttpAutoProxySvc dot3svc Wlansvc wmiApSrv WwanSvc) DO (
+			REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
+			IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 3 >nul 2>&1)
+		::Disabled
+		FOR %%I IN (SharedAccess Mcx2Svc NetTcpPortSharing RemoteAccess) DO (
+			REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
+			IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 4 >nul 2>&1)
+	)
+	IF "%winedition%" == "Windows 7 Enterprise" (
+		::Automatic
+		FOR %%I IN (BFE EventSystem CryptSvc DcomLaunch UxSms Dhcp DPS TrkWks Dnscache FDResPub gpsvc iphlpsvc 
+		clr_optimization_v2.0.50727 MMCSS NlaSvc nsi CscService PlugPlay Power Spooler RpcSs RpcEptMapper SamSs 
+		wscsvc LanmanServer ShellHWDetection sppsvc SysMain SENS Schedule lmhosts Themes ProfSvc AudioSrv 
+		AudioEndpointBuilder WinDefend EventLog MpsSvc FontCache Winmgmt WSearch wuauserv LanmanWorkstation) DO (
+			REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
+			IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 2 >nul 2>&1)
+		::Manual
+		FOR %%I IN (AxInstSV SensrSvc AeLookupSvc AppIDSvc Appinfo ALG AppMgmt BITS BDESVC wbengine bthserv 
+		PeerDistSvc CertPropSvc KeyIso COMSysApp Browser VaultSvc WdiServiceHost WdiSystemHost defragsvc MSDTC 
+		EFS EapHost Fax fdPHost hkmsvc HomeGroupListener HomeGroupProvider hidserv IKEEXT UI0Detect PolicyAgent 
+		KtmRm lltdsvc MSiSCSI swprv Netlogon napagent Netman netprofm WPCSvc PNRPsvc p2psvc p2pimsvc pla IPBusEnum 
+		PNRPAutoReg WPDBusEnum wercplsupport PcaSvc ProtectedStorage QWAVE RasAuto RasMan SessionEnv TermService 
+		UmRdpService RpcLocator RemoteRegistry seclogon SstpSvc SCardSvr SCPolicySvc SNMPTRAP sppuinotify SSDPSRV 
+		StorSvc TabletInputService TapiSrv THREADORDER TBS upnphost vds VSS WebClient SDRSVC WbioSrvc idsvc 
+		WcsPlugInService wcncsvc wudfsvc WerSvc Wecsvc StiSvc msiserver ehRecvr ehSched WMPNetworkSvc 
+		TrustedInstaller FontCache3.0.0.0 WinRM W32Time WinHttpAutoProxySvc dot3svc Wlansvc wmiApSrv WwanSvc) DO (
+			REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
+			IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 3 >nul 2>&1)
+		::Disabled
+		FOR %%I IN (SharedAccess Mcx2Svc NetTcpPortSharing RemoteAccess) DO (
+			REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
+			IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 4 >nul 2>&1)
+	)
 )
-goto home
+GOTO :HOME
 
 :SVCSAFEDESK
 ::Automatic
@@ -653,7 +799,7 @@ ShellHWDetection sppsvc SysMain OneSyncSvc_????? SENS SystemEventsBroker Schedul
 tiledatamodelsvc UserManager ProfSvc AudioSrv AudioEndpointBuilder Wcmsvc WinDefend 
 SecurityHealthService EventLog MpsSvc FontCache Winmgmt WpnService WSearch LanmanWorkstation) DO (
 	REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
-	If NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 2 >nul 2>&1)
+	IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 2 >nul 2>&1)
 ::Manual
 FOR %%I IN (AxInstSV AJRouter AppReadiness AppIDSvc Appinfo AppMgmt AppXSVC BDESVC wbengine 
 BthHFSrv bthserv CertPropSvc ClipSVC KeyIso COMSysApp Browser PimIndexMaintenanceSvc_????? 
@@ -670,7 +816,7 @@ WebClient SDRSVC WbioSrvc wcncsvc Sense WdNisSvc wudfsvc WEPHOSTSVC WerSvc Wecsv
 LicenseManager TrustedInstaller WpnUserService_????? W32Time wuauserv WinHttpAutoProxySvc dot3svc 
 WlanSvc wmiApSrv XboxGipSvc) DO (
 	REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
-	If NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 3 >nul 2>&1)
+	IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 3 >nul 2>&1)
 ::Disabled
 FOR %%I IN (ALG tzautoupdate PeerDistSvc NfsClnt dmwappushsvc MapsBroker lfsvc HvHost 
 vmickvpexchange vmicguestinterface vmicshutdown vmicheartbeat vmicvmsession vmicrdv 
@@ -680,8 +826,8 @@ SensorService shpamsvc SCardSvr ScDeviceEnum SCPolicySvc SNMPTRAP TabletInputSer
 UevAgentService WFDSConSvc FrameServer wisvc WMPNetworkSvc icssvc WinRM WwanSvc 
 XblAuthManager XblGameSave XboxNetApiSvc) DO (
 	REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
-	If NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 4 >nul 2>&1)
-goto home
+	IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 4 >nul 2>&1)
+GOTO :HOME
 :SVCSAFELAPTAB
 ::Automatic
 FOR %%I IN (BITS BrokerInfrastructure BFE EventSystem CDPSvc CDPUserSvc_????? DiagTrack 
@@ -691,7 +837,7 @@ ShellHWDetection sppsvc SysMain OneSyncSvc_????? SENS SystemEventsBroker Schedul
 tiledatamodelsvc UserManager ProfSvc AudioSrv AudioEndpointBuilder Wcmsvc WinDefend 
 SecurityHealthService EventLog MpsSvc FontCache Winmgmt WpnService WSearch WlanSvc LanmanWorkstation) DO (
 	REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
-	If NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 2 >nul 2>&1)
+	IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 2 >nul 2>&1)
 ::Manual
 FOR %%I IN (AxInstSV AJRouter AppReadiness AppIDSvc Appinfo AppMgmt AppXSVC BDESVC 
 wbengine BthHFSrv bthserv CertPropSvc ClipSVC KeyIso COMSysApp Browser PimIndexMaintenanceSvc_????? 
@@ -708,7 +854,7 @@ vds VSS WalletService WebClient WFDSConSvc SDRSVC WbioSrvc wcncsvc Sense WdNisSv
 Wecsvc StiSvc msiserver LicenseManager TrustedInstaller WpnUserService_????? W32Time wuauserv WinHttpAutoProxySvc 
 dot3svc wmiApSrv XboxGipSvc) DO (
 	REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
-	If NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 3 >nul 2>&1)
+	IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 3 >nul 2>&1)
 ::Disabled
 FOR %%I IN (ALG tzautoupdate PeerDistSvc NfsClnt dmwappushsvc MapsBroker lfsvc HvHost vmickvpexchange 
 vmicguestinterface vmicshutdown vmicheartbeat vmicvmsession vmicrdv vmictimesync vmicvss irmon SharedAccess 
@@ -716,8 +862,8 @@ AppVClient MSiSCSI SmsRouter CscService SEMgrSvc PhoneSvc RpcLocator RemoteRegis
 shpamsvc SCardSvr ScDeviceEnum SCPolicySvc SNMPTRAP UevAgentService FrameServer wisvc WMPNetworkSvc icssvc 
 WinRM WwanSvc XblAuthManager XblGameSave XboxNetApiSvc) DO (
 	REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
-	If NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 4 >nul 2>&1)
-goto home
+	IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 4 >nul 2>&1)
+GOTO :HOME
 ::::::::::::::::::::::::::::::::::::::
 :: BATCH SCRIPT INTERNAL FUNCTIONS  ::
 ::::::::::::::::::::::::::::::::::::::
@@ -727,38 +873,46 @@ GOTO :eof
 ::END.XWAIT
 
 :XDONE
-echo/
-echo/===========================================================
-echo/DONE: %* 
-echo/
-IF DEFINED _TRACE echo Press any key to quit &PAUSE >nul &EXIT
+ECHO/
+ECHO/===========================================================
+ECHO/DONE: %* 
+ECHO/
+IF DEFINED _TRACE ECHO Press any key to quit &PAUSE >nul &EXIT
 CALL :XWAIT 20 &EXIT
 GOTO :eof
 ::END.XDONE
 
 :XERR
 CLS
-echo/
-echo/ERROR: %* 
+ECHO/
+ECHO/ERROR: %* 
 PAUSE
 IF NOT DEFINED _TRACE EXIT
 GOTO :eof
 ::END.XERR
 
 :XECHO
-echo/
-IF NOT "%1_"=="_" echo/%_nline%:%*
-IF DEFINED _TRACE echo/ &PAUSE
+ECHO/
+IF NOT "%1_"=="_" ECHO/%_nline%:%*
+IF DEFINED _TRACE ECHO/ &PAUSE
 SET /A _nline+=1
 CALL :XWAIT 2
 GOTO :eof
 ::END.XECHO
 
+:XMENU
+ECHO/
+IF NOT "%1_"=="_" ECHO/%_nline%. %*
+IF DEFINED _TRACE ECHO/ &PAUSE
+SET /A _nline+=1
+GOTO :eof
+::END.XECHO
+
 :XTITLE
-echo/
-IF NOT "%1_"=="_" echo/===========================================================
-IF NOT "%1_"=="_" echo/   %*
-IF NOT "%1_"=="_" echo/===========================================================
+ECHO/
+IF NOT "%1_"=="_" ECHO/===========================================================
+IF NOT "%1_"=="_" ECHO/   %*
+IF NOT "%1_"=="_" ECHO/===========================================================
 SET /A _nline=1
 GOTO :eof
 ::END.XTITLE
