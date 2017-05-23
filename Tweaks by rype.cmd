@@ -33,10 +33,10 @@ CALL :XMENU System Tweaks
 CALL :XMENU Network Tweaks
 IF %winversion% == 100 (CALL :XMENU Remove Windows 10 Apps) ELSE (CALL :XMENU N/A)
 CALL :XMENU PowerConfig Tweaks
-CALL :XMENU N/A
-CALL :XMENU N/A
-CALL :XMENU N/A
-CALL :XMENU N/A
+CALL :XMENU Disable Graphiccard Sound
+IF %winversion% == 100 (CALL :XMENU Remove OneDrive) ELSE (CALL :XMENU N/A)
+CALL :XMENU Remove Telemetry (Microsoft Anti-Spy)
+CALL :XMENU Automatic Tweaks and Anti-Spy
 ECHO.
 
 
@@ -46,10 +46,10 @@ IF "%web%"=="2" GOTO :SYSTWEAK
 IF "%web%"=="3" GOTO :NETTWEAK
 IF %winversion% == 100 (IF "%web%"=="4" GOTO :RMWINAPPS)
 IF "%web%"=="5" GOTO :POWERTWEAK
-IF "%web%"=="6" GOTO :6
-IF "%web%"=="7" GOTO :7
-IF "%web%"=="8" GOTO :8
-IF "%web%"=="9" GOTO :9
+IF "%web%"=="6" GOTO :DISGRAPHIXSOUND
+IF %winversion% == 100 (IF "%web%"=="7" GOTO :RMONEDRIVE)
+IF "%web%"=="8" GOTO :RMTELEMETRY
+IF "%web%"=="9" GOTO :AUTOTWEAKS
 GOTO :HOME
 
 
@@ -58,9 +58,9 @@ CALL :XTITLE SERVICE TWEAKS BY Black Viper - www.blackviper.com
 ECHO.
 ECHO Select:
 ECHO.
-ECHO 1. Safe
-ECHO 2. Tweaked
-ECHO 3. Default
+CALL :XMENU Safe
+CALL :XMENU Tweaked
+CALL :XMENU Default
 ECHO.
 
 
@@ -115,7 +115,6 @@ GOTO :HOME
 
 
 :NETTWEAK
-@ECHO off
 CALL :XTITLE GENERAL NETWORK TWEAKS
 CALL :XECHO HW network driver tweaks - flow control, buffers, offload processing
 FOR /F "tokens=3*" %%I IN ('REG QUERY "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkCards" /F "ServiceName" /S^|FINDSTR /I /L "ServiceName"') DO (
@@ -144,7 +143,7 @@ FOR /F %%A IN ('REG QUERY "HKLM\SYSTEM\CurrentControlSet\Control\Class\{4D36E972
 	REG QUERY "!REGPATH!" /V "LogLinkStateEvent" >nul 2>&1
 	IF NOT ERRORLEVEL 1 REG ADD "!REGPATH!" /F /V "LogLinkStateEvent" /T REG_SZ /D 16 >nul 2>&1
 )
-::REM Speedguide.net tweaks
+:: Speedguide.net tweaks
 IF %winversion% GEQ 51 (
 	CALL :XECHO Disable Nagle's Algorithm
 	FOR /F "tokens=3*" %%I IN ('REG QUERY "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkCards" /F "ServiceName" /S^|FINDSTR /I /L "ServiceName"') DO (
@@ -222,51 +221,19 @@ IF %winversion% == 100 (
 	powershell "SET-NetTCPSetting -SettingName InternetCustom -MinRto 300" >nul 2>&1
 	ECHO.
 	REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\Ndu" /F /v Start /T REG_DWORD /D 4 >nul 2>&1
+	FOR %%I IN ("Microsoft Kernel Debug Network Adapter" "WAN Miniport" "Teredo Tunneling") DO powershell "Get-PnpDevice | Where-Object { $_.FriendlyName -match '%%I' } | Disable-PnpDevice -Confirm:$false"  >nul 2>&1
 )
 PAUSE
 GOTO :HOME
 
 
 :RMWINAPPS
-@ECHO off
-ECHO. 
-ECHO     Remove One Drive? (y/n)
-ECHO.
-SET /p web=Type option:
-IF "%web%"=="y" GOTO :y_od
-IF "%web%"=="n" GOTO :n_od
-
-:y_od
-ECHO.
-ECHO Uninstalling OneDrive
-SET x86="%SYSTEMROOT%\System32\OneDriveSetup.exe"
-SET x64="%SYSTEMROOT%\SysWOW64\OneDriveSetup.exe"
-taskkill /f /im OneDrive.exe > NUL 2>&1
-ping 127.0.0.1 -n 5 > NUL 2>&1 
-IF exist %x64% (
-%x64% /uninstall
-) ELSE (
-%x86% /uninstall
-)
-ping 127.0.0.1 -n 8 > NUL 2>&1 
-rd "%USERPROFILE%\OneDrive" /Q /S > NUL 2>&1
-rd "C:\OneDriveTemp" /Q /S > NUL 2>&1
-rd "%LOCALAPPDATA%\Microsoft\OneDrive" /Q /S > NUL 2>&1
-rd "%PROGRAMDATA%\Microsoft OneDrive" /Q /S > NUL 2>&1 
-ECHO.
-ECHO Removeing OneDrive from the Explorer Side Panel.
-REG DELETE "HKEY_CLASSES_ROOT\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" /f > NUL 2>&1
-REG DELETE "HKEY_CLASSES_ROOT\Wow6432Node\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" /f > NUL 2>&1
-GOTO :2nd_part
-:n_od
-GOTO :2nd_part
-
-:2nd_part
+CALL :XTITLE REMOVE WINDOWS APPS
 ECHO.
 ECHO  	 Question:
 ECHO.
-ECHO 1. Permanently Remove Apps 
-ECHO 2. Uninstall Apps 
+CALL :XMENU Permanently Remove Apps 
+CALL :XMENU Uninstall Apps 
 ECHO.
 SET /p web=Type option:
 IF "%web%"=="1" GOTO :PRA
@@ -295,7 +262,7 @@ powershell "Get-appxprovisionedpackage -online | Where DisplayName -like *ZuneMu
 powershell "Get-appxprovisionedpackage -online | Where DisplayName -like *ZuneVideo* | remove-appxprovisionedpackage -online"
 powershell "Get-appxprovisionedpackage -online | Where DisplayName -like *3DBuilder* | remove-appxprovisionedpackage -online"
 PAUSE
-GOTO dh
+GOTO :HOME
 :UA
 powershell "Get-AppxPackage *BingFinance* | Remove-AppxPackage"
 powershell "Get-AppxPackage *BingNews* | Remove-AppxPackage"
@@ -320,25 +287,13 @@ powershell "Get-AppxPackage *ZuneMusic* | Remove-AppxPackage"
 powershell "Get-AppxPackage *ZuneVideo* | Remove-AppxPackage"
 powershell "Get-AppxPackage *3DBuilder* | Remove-AppxPackage"
 PAUSE
-:dh
-ECHO.
-ECHO  	 Disable Hibernation? (y/n)
-ECHO.
-SET /p web=Type option:
-IF "%web%"=="y" GOTO :y_dh
-IF "%web%"=="n" GOTO :n_dh
-:y_dh
-@ECHO on
-powercfg -h off
-@ECHO off
-GOTO 3rd_part
-:n_dh
-GOTO 3rd_part
-
-:3rd_part
 GOTO :HOME
 
 
+
+::::::::::::::::::::::::::
+:: POWERSETTINGS TWEAKS ::
+::::::::::::::::::::::::::
 :POWERTWEAK
 CALL :XTITLE POWERCONFIG TWEAKS
 CALL :XECHO Backup Stock Settings 
@@ -436,24 +391,89 @@ powercfg -setactive scheme_current
 GOTO :HOME
 
 
-:6 
+:DISGRAPHIXSOUND 
+FOR %%I IN ("NVIDIA High Definition Audio") DO powershell "Get-PnpDevice | Where-Object { $_.FriendlyName -match '%%I' } | Disable-PnpDevice -Confirm:$false"  >nul 2>&1
 GOTO :HOME
 
 
-:7 
-GOTO :HOME
 
+::::::::::::::::::::::::::::::::
+:: REMOVE MICROSOFT ONEDRIVE  ::
+::::::::::::::::::::::::::::::::
+:RMONEDRIVE
+CALL :XTITLE Uninstalling OneDrive
+SET x86="%SYSTEMROOT%\System32\OneDriveSetup.exe"
+SET x64="%SYSTEMROOT%\SysWOW64\OneDriveSetup.exe"
+taskkill /f /im OneDrive.exe > NUL 2>&1
+ping 127.0.0.1 -n 5 > NUL 2>&1 
+IF exist %x64% (
+%x64% /uninstall
+) ELSE (
+%x86% /uninstall
+)
+ping 127.0.0.1 -n 8 > NUL 2>&1 
+rd "%USERPROFILE%\OneDrive" /Q /S > NUL 2>&1
+rd "C:\OneDriveTemp" /Q /S > NUL 2>&1
+rd "%LOCALAPPDATA%\Microsoft\OneDrive" /Q /S > NUL 2>&1
+rd "%PROGRAMDATA%\Microsoft OneDrive" /Q /S > NUL 2>&1 
+ECHO.
+ECHO Removeing OneDrive from the Explorer Side Panel.
+REG DELETE "HKEY_CLASSES_ROOT\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" /f > NUL 2>&1
+REG DELETE "HKEY_CLASSES_ROOT\Wow6432Node\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" /f > NUL 2>&1
+GOTO :HOME
 
 :8 
 GOTO :HOME
 
 
-:9 
+
+:::::::::::::::::::::::::::::::::
+:: REMOVE MICROSOFT TELEMETRY  ::
+:::::::::::::::::::::::::::::::::
+:RMTELEMETRY
+CALL :XTITLE EDITING HOSTS FILE
+FOR %%I IN (adnxs.com c.msn.com g.msn.com h1.msn.com msedge.net ads.msn.com adnexus.net
+ac3.msn.com c.atdmt.com m.adnxs.com rad.msn.com so.2mdn.net ads1.msn.com ec.atdmt.com flex.msn.com rad.live.com
+ui.skype.com msftncsi.com a-msedge.net a.rad.msn.com b.rad.msn.com cdn.atdmt.com m.hotmail.com ads1.msads.net
+a.ads1.msn.com a.ads2.msn.com apps.skype.com b.ads1.msn.com view.atdmt.com watson.live.com aidps.atdmt.com 
+preview.msn.com static.2mdn.net a.ads2.msads.net b.ads2.msads.net db3aqu.atdmt.com secure.adnxs.com www.msftncsi.com 
+cs1.wpc.v0cdn.net live.rads.msn.com ad.doubleclick.net bs.serving-sys.com a-0001.a-msedge.net pricelist.skype.com 
+stats-microsoft.com a-0002.a-msedge.net a-0003.a-msedge.net a-0004.a-msedge.net a-0005.a-msedge.net a-0006.a-msedge.net
+a-0007.a-msedge.net a-0008.a-msedge.net a-0009.a-msedge.net choice.microsoft.com watson.microsoft.com feedback.windows.com 
+aka-cdn-ns.adtech.de cds26.ams9.msecn.net lb1.www.ms.akadns.net corp.sts.microsoft.com az361816.vo.msecnd.net 
+az512334.vo.msecnd.net telemetry.microsoft.com msntest.serving-sys.com secure.flashtalking.com telemetry.appex.bing.net 
+pre.footprintpredict.com vortex.data.microsoft.com statsfe2.ws.microsoft.com statsfe1.ws.microsoft.com df.telemetry.microsoft.com 
+feedback.microsoft-hohm.com oca.telemetry.microsoft.com sqm.telemetry.microsoft.com telemetry.urs.microsoft.com 
+survey.watson.microsoft.com compatexchange.cloudapp.net s.gateway.messenger.live.com vortex-win.data.microsoft.com feedback.search.microsoft.com 
+schemas.microsoft.akadns.net watson.telemetry.microsoft.com choice.microsoft.com.nsatc.net wes.df.telemetry.microsoft.com sqm.df.telemetry.microsoft.com 
+settings-win.data.microsoft.com redir.metaservices.microsoft.com i1.services.social.microsoft.com vortex-sandbox.data.microsoft.com 
+diagnostics.support.microsoft.com watson.ppe.telemetry.microsoft.com msnbot-65-55-108-23.search.msn.com telecommand.telemetry.microsoft.com 
+settings-sandbox.data.microsoft.com sls.update.microsoft.com.akadns.net fe2.update.microsoft.com.akadns.net vortex-bn2.metron.live.com.nsatc.net 
+vortex-cy2.metron.live.com.nsatc.net oca.telemetry.microsoft.com.nsatc.net sqm.telemetry.microsoft.com.nsatc.net reports.wes.df.telemetry.microsoft.com 
+corpext.msitadfs.glbdns2.microsoft.com services.wes.df.telemetry.microsoft.com watson.telemetry.microsoft.com.nsatc.net statsfe2.update.microsoft.com.akadns.net 
+i1.services.social.microsoft.com.nsatc.net telecommand.telemetry.microsoft.com.nsatc.net telemetry.appex.bing.com) DO ( 
+	FIND /C /I "%%I" %WINDIR%\system32\drivers\etc\hosts > NUL 2>&1
+	IF !ERRORLEVEL! neq 0 (
+		CALL :XECHOF Add %%I to hosts
+		ECHO ^0.0.0.0 %%I>>%WINDIR%\system32\drivers\etc\hosts
+	)
+)	
+pause
 GOTO :HOME
 
 
-:10
+:AUTOTWEAKS
+CALL :SVCTWEAKED
+CALL :SYSTWEAK
+CALL :POWERTWEAK
+CALL :NETTWEAK
+CALL :RMONEDRIVE
+CALL :RMTELEMETRY
+CALL :XDONE
 GOTO :HOME
+
+
+
 
 :::::::::::::::::::::::::::::::::
 :: WINDOWS SVC BY Black Viper  ::
@@ -864,6 +884,9 @@ WinRM WwanSvc XblAuthManager XblGameSave XboxNetApiSvc) DO (
 	REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
 	IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 4 >nul 2>&1)
 GOTO :HOME
+
+
+
 ::::::::::::::::::::::::::::::::::::::
 :: BATCH SCRIPT INTERNAL FUNCTIONS  ::
 ::::::::::::::::::::::::::::::::::::::
@@ -900,13 +923,22 @@ CALL :XWAIT 2
 GOTO :eof
 ::END.XECHO
 
+:XECHOF
+ECHO/
+IF NOT "%1_"=="_" ECHO/%_nline%:%*
+IF DEFINED _TRACE ECHO/ &PAUSE
+SET /A _nline+=1
+CALL :XWAIT 1
+GOTO :eof
+::END.XECHOF
+
 :XMENU
 ECHO/
 IF NOT "%1_"=="_" ECHO/%_nline%. %*
 IF DEFINED _TRACE ECHO/ &PAUSE
 SET /A _nline+=1
 GOTO :eof
-::END.XECHO
+::END.XMENU
 
 :XTITLE
 ECHO/
