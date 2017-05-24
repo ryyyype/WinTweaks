@@ -126,12 +126,12 @@ CALL :XTITLE GENERAL NETWORK TWEAKS
 CALL :XECHO HW network driver tweaks - flow control, buffers, offload processing
 FOR /F "tokens=3*" %%I IN ('REG QUERY "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkCards" /F "ServiceName" /S^|FINDSTR /I /L "ServiceName"') DO (
 FOR /F %%A IN ('REG QUERY "HKLM\SYSTEM\CurrentControlSet\Control\Class\{4D36E972-E325-11CE-BFC1-08002BE10318}" /F "%%I" /D /E /S ^|FINDSTR /I /L /V "Linkage"^|FINDSTR /I /L "\\Class\\"') DO SET "REGPATH=%%A" >nul 2>&1
-	FOR %%n IN (#FlowControl #InterruptModeration #LsoV1IPv4 #LsoV2IPv4 #LsoV2IPv6 #PMARPOffload #PMNSOffload #PriorityVLANTag #WakeOnMagicPacket #WakeOnPattern AdaptiveIFS ITR MasterSlave WaitAutoNegComplete) DO (
+	FOR %%n IN (#FlowControl #InterruptModeration #LsoV1IPv4 #LsoV2IPv4 #LsoV2IPv6 #PMARPOffload #PMNSOffload #WakeOnMagicPacket #WakeOnPattern AdaptiveIFS EEELinkAdvertisement EnablePME ITR MasterSlave WaitAutoNegComplete) DO (
 		SET opt=%%n
 		SET opt=!opt:#=*!
 		REG QUERY "!REGPATH!" /V !opt! >nul 2>&1
 		IF NOT ERRORLEVEL 1 REG ADD "!REGPATH!" /F /V !opt! /T REG_SZ /D 0 >nul 2>&1 )
-	FOR %%m IN () DO (
+	FOR %%m IN (#PriorityVLANTag ) DO (
 		SET opt=%%m
 		SET opt=!opt:#=*!
 		REG QUERY "!REGPATH!" /V !opt! >nul 2>&1
