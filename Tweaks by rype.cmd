@@ -62,8 +62,9 @@ CALL :XMENU Safe
 CALL :XMENU Tweaked
 CALL :XMENU Default
 ECHO.
-
-
+IF %winversion% == 100 (
+	CALL :XSVCTOKEN
+)
 SET /p web=Type option:
 IF "%web%"=="1" GOTO :SVCSAFE
 IF "%web%"=="2" GOTO :SVCTWEAKED
@@ -111,7 +112,13 @@ IF %winversion% GEQ 61 (
 	REG ADD "HKCU\Control Panel\Desktop\WindowMetrics" /F /v MinAnimate /T REG_SZ /D 0 >nul 2>&1
 	REG ADD "HKCU\Software\Microsoft\Windows\DWM" /F /v Max3DWindows /T REG_DWORD /D 4 >nul 2>&1
 )
-GOTO :HOME
+IF %winversion% == 100 (
+	FOR %%I IN ("SmartScreenSpecific" "Microsoft Compatibility Appraiser" ProgramDataUpdater
+	Proxy Consolidator KernelCeipTask UsbCeip Microsoft-Windows-DiskDiagnosticDataCollector
+	Microsoft-Windows-DiskDiagnosticResolver Sqm-Tasks) DO powershell "Get-ScheduledTask -TaskName %%I | %% { Disable-ScheduledTask -TaskName $_.TaskName -TaskPath $_.TaskPath } >NUL 2>&1"
+)
+IF NOT DEFINED AUTOTWEAK GOTO :HOME
+IF DEFINED AUTOTWEAK GOTO :POWERTWEAK
 
 
 :NETTWEAK
@@ -223,8 +230,8 @@ IF %winversion% == 100 (
 	REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\Ndu" /F /v Start /T REG_DWORD /D 4 >nul 2>&1
 	FOR %%I IN ("Microsoft Kernel Debug Network Adapter" "WAN Miniport" "Teredo Tunneling") DO powershell "Get-PnpDevice | Where-Object { $_.FriendlyName -match '%%I' } | Disable-PnpDevice -Confirm:$false"  >nul 2>&1
 )
-PAUSE
-GOTO :HOME
+IF NOT DEFINED AUTOTWEAK GOTO :HOME
+IF DEFINED AUTOTWEAK GOTO :RMONEDRIVE
 
 
 :RMWINAPPS
@@ -388,7 +395,8 @@ powercfg -setacvalueindex scheme_current sub_processor cfeda3d0-7697-4566-a922-a
 
 CALL :XECHO Save new settings
 powercfg -setactive scheme_current
-GOTO :HOME
+IF NOT DEFINED AUTOTWEAK GOTO :HOME
+IF DEFINED AUTOTWEAK GOTO :NETTWEAK
 
 
 :DISGRAPHIXSOUND 
@@ -420,7 +428,8 @@ ECHO.
 ECHO Removeing OneDrive from the Explorer Side Panel.
 REG DELETE "HKEY_CLASSES_ROOT\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" /f > NUL 2>&1
 REG DELETE "HKEY_CLASSES_ROOT\Wow6432Node\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" /f > NUL 2>&1
-GOTO :HOME
+IF NOT DEFINED AUTOTWEAK GOTO :HOME
+IF DEFINED AUTOTWEAK GOTO :RMTELEMETRY
 
 :8 
 GOTO :HOME
@@ -451,26 +460,91 @@ diagnostics.support.microsoft.com watson.ppe.telemetry.microsoft.com msnbot-65-5
 settings-sandbox.data.microsoft.com sls.update.microsoft.com.akadns.net fe2.update.microsoft.com.akadns.net vortex-bn2.metron.live.com.nsatc.net 
 vortex-cy2.metron.live.com.nsatc.net oca.telemetry.microsoft.com.nsatc.net sqm.telemetry.microsoft.com.nsatc.net reports.wes.df.telemetry.microsoft.com 
 corpext.msitadfs.glbdns2.microsoft.com services.wes.df.telemetry.microsoft.com watson.telemetry.microsoft.com.nsatc.net statsfe2.update.microsoft.com.akadns.net 
-i1.services.social.microsoft.com.nsatc.net telecommand.telemetry.microsoft.com.nsatc.net telemetry.appex.bing.com) DO ( 
+i1.services.social.microsoft.com.nsatc.net telecommand.telemetry.microsoft.com.nsatc.net telemetry.appex.bing.com
+a-0001.a-msedge.net a-0001.dc-msedge.net a-0002.a-msedge.net a-0003.a-msedge.net a-0004.a-msedge.net
+a-0005.a-msedge.net a-0006.a-msedge.net a-0007.a-msedge.net a-0008.a-msedge.net a-0009.a-msedge.net
+a-0010.a-msedge.net a-0011.a-msedge.net a-0012.a-msedge.net a1621.g.akamai.net a1856.g2.akamai.net
+a1961.g.akamai.net a248.e.akamai.net a978.i6g1.akamai.net a.ads1.msn.com a.ads2.msads.net
+a.ads2.msn.com ac3.msn.com activity.windows.com adnexus.net adnxs.com ads1.msads.net
+ads1.msn.com ads.msn.com aidps.atdmt.com aka-cdn-ns.adtech.de a-msedge.net any.edge.bing.com
+a.rad.msn.com array101-prod.do.dsp.mp.microsoft.com array102-prod.do.dsp.mp.microsoft.com
+array103-prod.do.dsp.mp.microsoft.com array104-prod.do.dsp.mp.microsoft.com
+b.ads1.msn.com b.ads2.msads.net bingads.microsoft.com bl3301-a.1drv.com bl3301-c.1drv.com
+bl3301-g.1drv.com bn1304-e.1drv.com bn1306-a.1drv.com bn1306-e.1drv.com bn1306-g.1drv.com
+bn2b-cor001.api.p001.1drv.com bn2b-cor003.api.p001.1drv.com bn3p-cor001.api.p001.1drv.com
+b.rad.msn.com bs.serving-sys.com by3301-a.1drv.com by3301-c.1drv.com by3301-e.1drv.com
+c-0001.dc-msedge.net cache.datamart.windows.com c.atdmt.com ca.telemetry.microsoft.com
+cdn.atdmt.com cds26.ams9.msecn.net cds459.lcy.llnw.net cds965.lon.llnw.net
+ch1-cor001.api.p001.1drv.com ch1-cor002.api.p001.1drv.com ch3301-c.1drv.com
+ch3301-e.1drv.com ch3301-g.1drv.com ch3302-c.1drv.com ch3302-e.1drv.com
+choice.microsoft.com choice.microsoft.com.nsatc.net c.msn.com
+compatexchange1.trafficmanager.net compatexchange.cloudapp.net corpext.msitadfs.glbdns2.microsoft.com
+corp.sts.microsoft.com cp101-prod.do.dsp.mp.microsoft.com cs1.wpc.v0cdn.net
+db3aqu.atdmt.com db3wns2011111.wns.windows.com db5sch101100835.wns.windows.com
+db5sch101100917.wns.windows.com db5sch101101231.wns.windows.com db5sch101101334.wns.windows.com
+db5sch101101511.wns.windows.com db5sch101101739.wns.windows.com db5sch101101813.wns.windows.com
+db5sch101101835.wns.windows.com db5sch101101914.wns.windows.com db5sch101101939.wns.windows.com
+db5sch101110114.wns.windows.com db5sch101110206.wns.windows.com db5sch101110325.wns.windows.com
+db5sch101110328.wns.windows.com db5sch101110403.wns.windows.com db5sch101110626.wns.windows.com
+db5sch101110634.wns.windows.com db5sch101110740.wns.windows.com db5sch101110810.wns.windows.com
+db5sch101110816.wns.windows.com db5sch101110821.wns.windows.com db5sch101110822.wns.windows.com
+db5sch101110828.wns.windows.com db5sch103082111.wns.windows.com db5sch103082406.wns.windows.com
+db5sch103082712.wns.windows.com db5sch103091617.wns.windows.com db5sch103091715.wns.windows.com
+db5sch103092209.wns.windows.com db5sch103101411.wns.windows.com db5sch103102112.wns.windows.com 
+db5sch103102609.wns.windows.com db5wns1d.wns.windows.com db5.wns.windows.com
+db6sch102090510.wns.windows.com db6sch102090811.wns.windows.com db6sch102091008.wns.windows.com
+db6sch102091105.wns.windows.com db6sch102091412.wns.windows.com db6sch102091603.wns.windows.com
+dev.virtualearth.net df.telemetry.microsoft.com diagnostics.support.microsoft.com
+e2835.dspb.akamaiedge.net e7341.g.akamaiedge.net e7502.ce.akamaiedge.net e8218.ce.akamaiedge.net
+ec.atdmt.com ecn.dev.virtualearth.net eu.vortex.data.microsoft.com
+fe2.update.microsoft.com.akadns.net feedback.microsoft-hohm.com
+feedback.search.microsoft.com feedback.windows.com flex.msn.com geo-prod.do.dsp.mp.microsoft.com
+geover-prod.do.dsp.mp.microsoft.com g.msn.com h1.msn.com h2.msn.com hostedocsp.globalsign.com i1.services.social.microsoft.com
+i1.services.social.microsoft.com.nsatc.net inference.location.live.net ipv6.msftncsi.com
+ipv6.msftncsi.com.edgesuite.net i-sn2-cor001.api.p001.1drv.com
+i-sn2-cor002.api.p001.1drv.com kv101-prod.do.dsp.mp.microsoft.com
+lb1.www.ms.akadns.net live.rads.msn.com ls2web.redmond.corp.microsoft.com
+m.adnxs.com mobile.pipe.aria.microsoft.com msedge.net msntest.serving-sys.com nexus.officeapps.live.com
+nexusrules.officeapps.live.com oca.telemetry.microsoft.com oca.telemetry.microsoft.com.nsatc.net
+onesettings-bn2.metron.live.com.nsatc.net onesettings-cy2.metron.live.com.nsatc.net
+onesettings-db5.metron.live.com.nsatc.net onesettings-db5.metron.live.nsatc.net
+onesettings-hk2.metron.live.com.nsatc.net pre.footprintpredict.com preview.msn.com
+rad.live.com rad.msn.com redir.metaservices.microsoft.com reports.wes.df.telemetry.microsoft.com schemas.microsoft.akadns.net secure.adnxs.com 
+secure.flashtalking.com services.wes.df.telemetry.microsoft.com
+settings.data.glbdns2.microsoft.com settings.data.microsoft.com settings-sandbox.data.microsoft.com settings-win.data.microsoft.com
+sls.update.microsoft.com.akadns.net sn3301-c.1drv.com sn3301-e.1drv.com sn3301-g.1drv.com spynet2.microsoft.com spynetalt.microsoft.com
+spyneteurope.microsoft.akadns.net sqm.df.telemetry.microsoft.com sqm.telemetry.microsoft.com sqm.telemetry.microsoft.com.nsatc.net
+ssw.live.com statsfe1.ws.microsoft.com statsfe2.update.microsoft.com.akadns.net statsfe2.ws.microsoft.com
+storecatalogrevocation.storequality.microsoft.com survey.watson.microsoft.com t0.ssl.ak.dynamic.tiles.virtualearth.net
+t0.ssl.ak.tiles.virtualearth.net telecommand.telemetry.microsoft.com telecommand.telemetry.microsoft.com.nsatc.net
+telemetry.appex.bing.net telemetry.appex.bing.net:443 telemetry.microsoft.com telemetry.urs.microsoft.com
+tsfe.trafficshaping.dsp.mp.microsoft.com v10.vortex-win.data.metron.live.com.nsatc.net v10.vortex-win.data.microsoft.com
+version.hybrid.api.here.com view.atdmt.com vortex-bn2.metron.live.com.nsatc.net vortex-cy2.metron.live.com.nsatc.net
+vortex.data.glbdns2.microsoft.com vortex.data.metron.live.com.nsatc.net vortex.data.microsoft.com
+vortex-db5.metron.live.com.nsatc.net vortex-hk2.metron.live.com.nsatc.net vortex-sandbox.data.microsoft.com
+vortex-win.data.metron.live.com.nsatc.net vortex-win.data.microsoft.com watson.live.com watson.microsoft.com
+watson.ppe.telemetry.microsoft.com watson.telemetry.microsoft.com watson.telemetry.microsoft.com.nsatc.net
+web.vortex.data.microsoft.com wes.df.telemetry.microsoft.com win10.ipv6.microsoft.com www.msedge.net) DO ( 
 	FIND /C /I "%%I" %WINDIR%\system32\drivers\etc\hosts > NUL 2>&1
 	IF !ERRORLEVEL! neq 0 (
 		CALL :XECHOF Add %%I to hosts
 		ECHO ^0.0.0.0 %%I>>%WINDIR%\system32\drivers\etc\hosts
 	)
 )	
-pause
-GOTO :HOME
+IF NOT DEFINED AUTOTWEAK GOTO :HOME
+IF DEFINED AUTOTWEAK GOTO :AUTOTWEAKS
 
 
 :AUTOTWEAKS
-CALL :SVCTWEAKED
-CALL :SYSTWEAK
-CALL :POWERTWEAK
-CALL :NETTWEAK
-CALL :RMONEDRIVE
-CALL :RMTELEMETRY
+IF NOT DEFINED AUTOTWEAK (
+	SET AUTOTWEAK="y"
+	IF %winversion% == 100 (
+		CALL :XSVCTOKEN
+	)
+	GOTO :SVCTWEAKED
+)
 CALL :XDONE
-GOTO :HOME
+GOTO :eof
 
 
 
@@ -523,27 +597,27 @@ GOTO :HOME
 :SVCTWEAKED
 IF %winversion% == 100 (
 	::Automatic
-	FOR %%I IN (BITS BrokerInfrastructure BFE EventSystem CDPSvc CDPUserSvc_????? DiagTrack 
+	FOR %%I IN (BITS BrokerInfrastructure BFE EventSystem CDPSvc CDPUserSvc_%service% DiagTrack 
 	CoreMessagingRegistrar CryptSvc DusmSvc DcomLaunch DoSvc Dhcp DPS TrkWks Dnscache gpsvc 
 	LSM NlaSvc nsi Power Spooler PcaSvc RpcSs RpcEptMapper SamSs wscsvc LanmanServer ShellHWDetection 
-	sppsvc SysMain OneSyncSvc_????? SENS SystemEventsBroker Schedule Themes tiledatamodelsvc 
+	sppsvc SysMain OneSyncSvc_%service% SENS SystemEventsBroker Schedule Themes tiledatamodelsvc 
 	UserManager ProfSvc AudioSrv AudioEndpointBuilder Wcmsvc WinDefend SecurityHealthService 
 	EventLog MpsSvc FontCache Winmgmt WpnService WSearch LanmanWorkstation) DO (
 		REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
 		IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 2 >nul 2>&1)
 	::Manual
 	FOR %%I IN (AxInstSV AppReadiness AppIDSvc Appinfo AppXSVC BDESVC wbengine ClipSVC KeyIso 
-	COMSysApp Browser PimIndexMaintenanceSvc_????? VaultSvc DsSvc DeviceAssociationService 
-	DeviceInstall DmEnrollmentSvc DsmSVC DevicesFlowUserSvc_????? DevQueryBroker WdiServiceHost 
+	COMSysApp Browser PimIndexMaintenanceSvc_%service% VaultSvc DsSvc DeviceAssociationService 
+	DeviceInstall DmEnrollmentSvc DsmSVC DevicesFlowUserSvc_%service% DevQueryBroker WdiServiceHost 
 	WdiSystemHost MSDTC embeddedmode EFS EntAppSvc EapHost fhsvc fdPHost FDResPub HomeGroupListener 
-	HomeGroupProvider hidserv IKEEXT UI0Detect PolicyAgent KtmRm lltdsvc MessagingService_????? 
+	HomeGroupProvider hidserv IKEEXT UI0Detect PolicyAgent KtmRm lltdsvc MessagingService_%service% 
 	diagnosticshub.standardcollector.service wlidsvc NgcSvc NgcCtnrSvc swprv smphost NcbService 
 	Netman NcaSVC netprofm NetSetupSvc defragsvc PNRPsvc p2psvc p2pimsvc PerfHost pla PlugPlay 
 	PNRPAutoReg WPDBusEnum PrintNotify wercplsupport QWAVE RmSvc RasAuto RasMan seclogon SstpSvc 
 	svsvc SSDPSRV StateRepository WiaRpc StorSvc TieringEngineService lmhosts TapiSrv TimeBroker 
-	TokenBroker UsoSvc upnphost UserDataSvc_????? UnistoreSvc_????? vds VSS WalletService SDRSVC 
+	TokenBroker UsoSvc upnphost UserDataSvc_%service% UnistoreSvc_%service% vds VSS WalletService SDRSVC 
 	WbioSrvc Sense WdNisSvc wudfsvc WEPHOSTSVC WerSvc Wecsvc StiSvc msiserver LicenseManager 
-	TrustedInstaller WpnUserService_????? W32Time wuauserv WinHttpAutoProxySvc dot3svc WlanSvc 
+	TrustedInstaller WpnUserService_%service% W32Time wuauserv WinHttpAutoProxySvc dot3svc WlanSvc 
 	wmiApSrv XboxGipSvc) DO (
 		REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
 		IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 3 >nul 2>&1)
@@ -585,7 +659,9 @@ IF %winversion% == 61 (
 		REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
 		IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 4 >nul 2>&1)
 )
-GOTO :HOME
+IF NOT DEFINED AUTOTWEAK GOTO :HOME
+IF DEFINED AUTOTWEAK GOTO :SYSTWEAK
+
 :SVCDEFAULT
 ECHO.
 ECHO SET DEFAULT SERVICES FOR %winedition%
@@ -593,30 +669,30 @@ PAUSE
 IF %winversion% == 100 (
 	IF "%winedition%" == "Windows 10 Home" (
 		::Automatic
-		FOR %%I IN (BrokerInfrastructure BFE EventSystem CDPSvc CDPUserSvc_????? DiagTrack CoreMessagingRegistrar 
+		FOR %%I IN (BrokerInfrastructure BFE EventSystem CDPSvc CDPUserSvc_%service% DiagTrack CoreMessagingRegistrar 
 		CryptSvc DusmSvc DcomLaunch DoSvc Dhcp DPS TrkWks Dnscache MapsBroker gpsvc iphlpsvc LSM NlaSvc nsi 
 		Power Spooler PcaSvc RpcSs RpcEptMapper SamSs wscsvc LanmanServer ShellHWDetection sppsvc SysMain 
-		OneSyncSvc_????? SENS SystemEventsBroker Schedule Themes tiledatamodelsvc UserManager ProfSvc 
+		OneSyncSvc_%service% SENS SystemEventsBroker Schedule Themes tiledatamodelsvc UserManager ProfSvc 
 		AudioSrv AudioEndpointBuilder Wcmsvc WinDefend SecurityHealthService EventLog MpsSvc FontCache 
 		Winmgmt WpnService WSearch WlanSvc LanmanWorkstation) DO (
 			REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
 			IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 2 >nul 2>&1)
 		::Manual
 		FOR %%I IN (AxInstSV AJRouter AppReadiness AppIDSvc Appinfo ALG AppXSVC BITS BDESVC wbengine BthHFSrv 
-		bthserv CertPropSvc ClipSVC KeyIso COMSysApp Browser PimIndexMaintenanceSvc_????? VaultSvc DsSvc 
-		DeviceAssociationService DeviceInstall DmEnrollmentSvc DsmSVC DevicesFlowUserSvc_????? DevQueryBroker 
+		bthserv CertPropSvc ClipSVC KeyIso COMSysApp Browser PimIndexMaintenanceSvc_%service% VaultSvc DsSvc 
+		DeviceAssociationService DeviceInstall DmEnrollmentSvc DsmSVC DevicesFlowUserSvc_%service% DevQueryBroker 
 		WdiServiceHost WdiSystemHost MSDTC dmwappushsvc embeddedmode EFS EntAppSvc EapHost Fax fhsvc fdPHost 
 		FDResPub lfsvc HomeGroupListener HomeGroupProvider hidserv HvHost vmickvpexchange vmicguestinterface 
 		vmicshutdown vmicheartbeat vmicvmsession vmicrdv vmictimesync vmicvss IKEEXT irmon UI0Detect SharedAccess 
-		IpxlatCfgSvc PolicyAgent KtmRm lltdsvc wlpasvc MessagingService_????? diagnosticshub.standardcollector.service 
+		IpxlatCfgSvc PolicyAgent KtmRm lltdsvc wlpasvc MessagingService_%service% diagnosticshub.standardcollector.service 
 		wlidsvc MSiSCSI NgcSvc NgcCtnrSvc swprv smphost SmsRouter NaturalAuthentication Netlogon NcdAutoSetup NcbService 
 		Netman NcaSVC netprofm NetSetupSvc defragsvc SEMgrSvc PNRPsvc p2psvc p2pimsvc PerfHost pla PhoneSvc PlugPlay 
 		PNRPAutoReg WPDBusEnum PrintNotify wercplsupport QWAVE RmSvc RasAuto RasMan SessionEnv TermService UmRdpService 
 		RpcLocator RetailDemo seclogon SstpSvc SensorDataService SensrSvc SensorService ScDeviceEnum SCPolicySvc SNMPTRAP 
 		svsvc SSDPSRV StateRepository WiaRpc StorSvc TieringEngineService lmhosts TapiSrv TimeBroker TokenBroker 
-		TabletInputService UsoSvc upnphost UserDataSvc_????? UnistoreSvc_????? vds VSS WalletService WebClient 
+		TabletInputService UsoSvc upnphost UserDataSvc_%service% UnistoreSvc_%service% vds VSS WalletService WebClient 
 		WFDSConSvc SDRSVC WbioSrvc FrameServer wcncsvc WdNisSvc wudfsvc WEPHOSTSVC WerSvc Wecsvc StiSvc wisvc msiserver 
-		LicenseManager WMPNetworkSvc icssvc TrustedInstaller WpnUserService_????? WinRM W32Time wuauserv WinHttpAutoProxySvc 
+		LicenseManager WMPNetworkSvc icssvc TrustedInstaller WpnUserService_%service% WinRM W32Time wuauserv WinHttpAutoProxySvc 
 		dot3svc wmiApSrv workfolderssvc WwanSvc XboxGipSvc XblAuthManager XblGameSave XboxNetApiSvc) DO (
 			REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
 			IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 3 >nul 2>&1)
@@ -627,28 +703,28 @@ IF %winversion% == 100 (
 	)
 	IF "%winedition%" == "Windows 10 Pro" (
 		::Automatic
-		FOR %%I IN (BrokerInfrastructure BFE EventSystem CDPSvc CDPUserSvc_????? DiagTrack CoreMessagingRegistrar 
+		FOR %%I IN (BrokerInfrastructure BFE EventSystem CDPSvc CDPUserSvc_%service% DiagTrack CoreMessagingRegistrar 
 		CryptSvc DusmSvc DcomLaunch DoSvc Dhcp DPS TrkWks Dnscache MapsBroker gpsvc iphlpsvc LSM NlaSvc nsi Power
-		Spooler PcaSvc RpcSs RpcEptMapper SamSs wscsvc LanmanServer ShellHWDetection sppsvc SysMain OneSyncSvc_????? 
+		Spooler PcaSvc RpcSs RpcEptMapper SamSs wscsvc LanmanServer ShellHWDetection sppsvc SysMain OneSyncSvc_%service% 
 		SENS SystemEventsBroker Schedule Themes tiledatamodelsvc UserManager ProfSvc AudioSrv AudioEndpointBuilder 
 		Wcmsvc WinDefend SecurityHealthService EventLog MpsSvc FontCache Winmgmt WpnService WSearch WlanSvc LanmanWorkstation) DO (
 			REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
 			IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 2 >nul 2>&1)
 		::Manual
 		FOR %%I IN (AxInstSV AJRouter AppReadiness AppIDSvc Appinfo ALG AppMgmt AppXSVC BITS BDESVC wbengine BthHFSrv 
-		bthserv PeerDistSvc CertPropSvc ClipSVC KeyIso COMSysApp Browser PimIndexMaintenanceSvc_????? VaultSvc DsSvc 
-		DeviceAssociationService DeviceInstall DmEnrollmentSvc DsmSVC DevicesFlowUserSvc_????? DevQueryBroker WdiServiceHost 
+		bthserv PeerDistSvc CertPropSvc ClipSVC KeyIso COMSysApp Browser PimIndexMaintenanceSvc_%service% VaultSvc DsSvc 
+		DeviceAssociationService DeviceInstall DmEnrollmentSvc DsmSVC DevicesFlowUserSvc_%service% DevQueryBroker WdiServiceHost 
 		WdiSystemHost MSDTC dmwappushsvc embeddedmode EFS EntAppSvc EapHost Fax fhsvc fdPHost FDResPub lfsvc HomeGroupListener 
 		HomeGroupProvider hidserv HvHost vmickvpexchange vmicguestinterface vmicshutdown vmicheartbeat vmicvmsession vmicrdv 
-		vmictimesync vmicvss IKEEXT irmon UI0Detect SharedAccess IpxlatCfgSvc PolicyAgent KtmRm lltdsvc wlpasvc MessagingService_????? 
+		vmictimesync vmicvss IKEEXT irmon UI0Detect SharedAccess IpxlatCfgSvc PolicyAgent KtmRm lltdsvc wlpasvc MessagingService_%service% 
 		diagnosticshub.standardcollector.service wlidsvc MSiSCSI NgcSvc NgcCtnrSvc swprv smphost SmsRouter NaturalAuthentication 
 		Netlogon NcdAutoSetup NcbService Netman NcaSVC netprofm NetSetupSvc CscService defragsvc SEMgrSvc PNRPsvc p2psvc p2pimsvc 
 		PerfHost pla PhoneSvc PlugPlay PNRPAutoReg WPDBusEnum PrintNotify wercplsupport QWAVE RmSvc RasAuto RasMan SessionEnv 
 		TermService UmRdpService RpcLocator RetailDemo seclogon SstpSvc SensorDataService SensrSvc SensorService ScDeviceEnum 
 		SCPolicySvc SNMPTRAP svsvc SSDPSRV StateRepository WiaRpc StorSvc TieringEngineService lmhosts TapiSrv TimeBroker TokenBroker 
-		TabletInputService UsoSvc upnphost UserDataSvc_????? UnistoreSvc_????? vds VSS WalletService WebClient WFDSConSvc SDRSVC 
+		TabletInputService UsoSvc upnphost UserDataSvc_%service% UnistoreSvc_%service% vds VSS WalletService WebClient WFDSConSvc SDRSVC 
 		WbioSrvc FrameServer wcncsvc Sense WdNisSvc wudfsvc WEPHOSTSVC WerSvc Wecsvc StiSvc wisvc msiserver LicenseManager 
-		WMPNetworkSvc icssvc TrustedInstaller WpnUserService_????? WinRM W32Time wuauserv WinHttpAutoProxySvc dot3svc wmiApSrv 
+		WMPNetworkSvc icssvc TrustedInstaller WpnUserService_%service% WinRM W32Time wuauserv WinHttpAutoProxySvc dot3svc wmiApSrv 
 		workfolderssvc WwanSvc XboxGipSvc XblAuthManager XblGameSave XboxNetApiSvc) DO (
 			REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
 			IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 3 >nul 2>&1)
@@ -812,28 +888,28 @@ GOTO :HOME
 
 :SVCSAFEDESK
 ::Automatic
-FOR %%I IN (BITS BrokerInfrastructure BFE EventSystem CDPSvc CDPUserSvc_????? DiagTrack
+FOR %%I IN (BITS BrokerInfrastructure BFE EventSystem CDPSvc CDPUserSvc_%service% DiagTrack
 CoreMessagingRegistrar CryptSvc DusmSvc DcomLaunch DoSvc Dhcp DPS TrkWks Dnscache gpsvc 
 iphlpsvc LSM NlaSvc nsi Power Spooler PcaSvc RpcSs RpcEptMapper SamSs wscsvc LanmanServer 
-ShellHWDetection sppsvc SysMain OneSyncSvc_????? SENS SystemEventsBroker Schedule Themes 
+ShellHWDetection sppsvc SysMain OneSyncSvc_%service% SENS SystemEventsBroker Schedule Themes 
 tiledatamodelsvc UserManager ProfSvc AudioSrv AudioEndpointBuilder Wcmsvc WinDefend 
 SecurityHealthService EventLog MpsSvc FontCache Winmgmt WpnService WSearch LanmanWorkstation) DO (
 	REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
 	IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 2 >nul 2>&1)
 ::Manual
 FOR %%I IN (AxInstSV AJRouter AppReadiness AppIDSvc Appinfo AppMgmt AppXSVC BDESVC wbengine 
-BthHFSrv bthserv CertPropSvc ClipSVC KeyIso COMSysApp Browser PimIndexMaintenanceSvc_????? 
-VaultSvc DsSvc DeviceAssociationService DeviceInstall DmEnrollmentSvc DsmSVC DevicesFlowUserSvc_????? 
+BthHFSrv bthserv CertPropSvc ClipSVC KeyIso COMSysApp Browser PimIndexMaintenanceSvc_%service% 
+VaultSvc DsSvc DeviceAssociationService DeviceInstall DmEnrollmentSvc DsmSVC DevicesFlowUserSvc_%service% 
 DevQueryBroker WdiServiceHost WdiSystemHost MSDTC embeddedmode EFS EntAppSvc EapHost fhsvc fdPHost 
 FDResPub HomeGroupListener HomeGroupProvider hidserv IKEEXT UI0Detect IpxlatCfgSvc PolicyAgent 
-KtmRm lltdsvc wlpasvc MessagingService_????? diagnosticshub.standardcollector.service wlidsvc 
+KtmRm lltdsvc wlpasvc MessagingService_%service% diagnosticshub.standardcollector.service wlidsvc 
 NgcSvc NgcCtnrSvc swprv smphost NaturalAuthentication Netlogon NcdAutoSetup NcbService Netman 
 NcaSVC netprofm NetSetupSvc defragsvc PNRPsvc p2psvc p2pimsvc PerfHost pla PlugPlay PNRPAutoReg 
 WPDBusEnum PrintNotify wercplsupport QWAVE RmSvc RasAuto RasMan SessionEnv TermService UmRdpService 
 seclogon SstpSvc svsvc SSDPSRV StateRepository WiaRpc StorSvc TieringEngineService lmhosts TapiSrv 
-TimeBroker TokenBroker UsoSvc upnphost UserDataSvc_????? UnistoreSvc_????? vds VSS WalletService 
+TimeBroker TokenBroker UsoSvc upnphost UserDataSvc_%service% UnistoreSvc_%service% vds VSS WalletService 
 WebClient SDRSVC WbioSrvc wcncsvc Sense WdNisSvc wudfsvc WEPHOSTSVC WerSvc Wecsvc StiSvc msiserver
-LicenseManager TrustedInstaller WpnUserService_????? W32Time wuauserv WinHttpAutoProxySvc dot3svc 
+LicenseManager TrustedInstaller WpnUserService_%service% W32Time wuauserv WinHttpAutoProxySvc dot3svc 
 WlanSvc wmiApSrv XboxGipSvc) DO (
 	REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
 	IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 3 >nul 2>&1)
@@ -850,28 +926,28 @@ XblAuthManager XblGameSave XboxNetApiSvc) DO (
 GOTO :HOME
 :SVCSAFELAPTAB
 ::Automatic
-FOR %%I IN (BITS BrokerInfrastructure BFE EventSystem CDPSvc CDPUserSvc_????? DiagTrack 
+FOR %%I IN (BITS BrokerInfrastructure BFE EventSystem CDPSvc CDPUserSvc_%service% DiagTrack 
 CoreMessagingRegistrar CryptSvc DusmSvc DcomLaunch DoSvc Dhcp DPS TrkWks Dnscache gpsvc 
 iphlpsvc LSM NlaSvc nsi Power Spooler PcaSvc RpcSs RpcEptMapper SamSs wscsvc LanmanServer 
-ShellHWDetection sppsvc SysMain OneSyncSvc_????? SENS SystemEventsBroker Schedule Themes 
+ShellHWDetection sppsvc SysMain OneSyncSvc_%service% SENS SystemEventsBroker Schedule Themes 
 tiledatamodelsvc UserManager ProfSvc AudioSrv AudioEndpointBuilder Wcmsvc WinDefend 
 SecurityHealthService EventLog MpsSvc FontCache Winmgmt WpnService WSearch WlanSvc LanmanWorkstation) DO (
 	REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
 	IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 2 >nul 2>&1)
 ::Manual
 FOR %%I IN (AxInstSV AJRouter AppReadiness AppIDSvc Appinfo AppMgmt AppXSVC BDESVC 
-wbengine BthHFSrv bthserv CertPropSvc ClipSVC KeyIso COMSysApp Browser PimIndexMaintenanceSvc_????? 
-VaultSvc DsSvc DeviceAssociationService DeviceInstall DmEnrollmentSvc DsmSVC DevicesFlowUserSvc_????? 
+wbengine BthHFSrv bthserv CertPropSvc ClipSVC KeyIso COMSysApp Browser PimIndexMaintenanceSvc_%service% 
+VaultSvc DsSvc DeviceAssociationService DeviceInstall DmEnrollmentSvc DsmSVC DevicesFlowUserSvc_%service% 
 DevQueryBroker WdiServiceHost WdiSystemHost MSDTC embeddedmode EFS EntAppSvc EapHost fhsvc fdPHost 
 FDResPub HomeGroupListener HomeGroupProvider hidserv IKEEXT UI0Detect IpxlatCfgSvc PolicyAgent 
-KtmRm lltdsvc wlpasvc MessagingService_????? diagnosticshub.standardcollector.service wlidsvc NgcSvc 
+KtmRm lltdsvc wlpasvc MessagingService_%service% diagnosticshub.standardcollector.service wlidsvc NgcSvc 
 NgcCtnrSvc swprv smphost NaturalAuthentication Netlogon NcdAutoSetup NcbService Netman NcaSVC netprofm 
 NetSetupSvc defragsvc PNRPsvc p2psvc p2pimsvc PerfHost pla PlugPlay PNRPAutoReg WPDBusEnum PrintNotify 
 wercplsupport QWAVE RmSvc RasAuto RasMan SessionEnv TermService UmRdpService seclogon SstpSvc 
 SensorDataService SensrSvc SensorService svsvc SSDPSRV StateRepository WiaRpc StorSvc TieringEngineService 
-lmhosts TapiSrv TimeBroker TokenBroker TabletInputService UsoSvc upnphost UserDataSvc_????? UnistoreSvc_????? 
+lmhosts TapiSrv TimeBroker TokenBroker TabletInputService UsoSvc upnphost UserDataSvc_%service% UnistoreSvc_%service% 
 vds VSS WalletService WebClient WFDSConSvc SDRSVC WbioSrvc wcncsvc Sense WdNisSvc wudfsvc WEPHOSTSVC WerSvc 
-Wecsvc StiSvc msiserver LicenseManager TrustedInstaller WpnUserService_????? W32Time wuauserv WinHttpAutoProxySvc 
+Wecsvc StiSvc msiserver LicenseManager TrustedInstaller WpnUserService_%service% W32Time wuauserv WinHttpAutoProxySvc 
 dot3svc wmiApSrv XboxGipSvc) DO (
 	REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >nul 2>&1
 	IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 3 >nul 2>&1)
@@ -890,6 +966,19 @@ GOTO :HOME
 ::::::::::::::::::::::::::::::::::::::
 :: BATCH SCRIPT INTERNAL FUNCTIONS  ::
 ::::::::::::::::::::::::::::::::::::::
+:XSVCTOKEN
+REG EXPORT HKLM\SYSTEM\CurrentControlSet\Services %~dp0\TEMP.reg >NUL 2>&1
+FOR /F "SKIP=2" %%u IN ('FIND "CDPUserSvc_" %~dp0\TEMP.reg') DO (
+	FOR /F "TOKENS=1 DELIMS=<[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\CDPUserSvc_>" %%a in ("%%u") DO (
+		SET service=%%a
+		DEL /F /Q "%~dp0\TEMP.reg" >NUL 2>&1
+		GOTO :BREAK
+	)
+)
+:BREAK
+SET service=%service:~0,5%
+GOTO :eof
+
 :XWAIT
 PING -n %1 127.0.0.1 >nul 2>&1
 GOTO :eof
