@@ -978,6 +978,7 @@ FOR /F "SKIP=2" %%u IN ('FIND "CDPUserSvc_" %~dp0\TEMP.reg') DO (
 :BREAK
 SET service=%service:~0,5%
 GOTO :eof
+::END.XSVCTOKEN
 
 :XWAIT
 PING -n %1 127.0.0.1 >nul 2>&1
