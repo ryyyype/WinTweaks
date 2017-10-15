@@ -152,8 +152,6 @@ IF %winversion% == 100 (
 	
 	CALL :XECHO Disable the Windows Update feature
 	REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /F /v NoAutoUpdate /T REG_DWORD /D 1 >NUL 2>&1
-	REG ADD "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\WindowsUpdate" /F /v DisableWindowsUpdateAccess /T REG_DWORD /D 1 >NUL 2>&1
-	REG ADD "HKLM\SYSTEM\Internet Communication Management\Internet Communication" /F /v DisableWindowsUpdateAccess /T REG_DWORD /D 1 >NUL 2>&1
 	
 	CALL :XECHO OS compatibility tweaks - crash, data collection, timeouts, game priority
 	fsutil behavior set disable8dot3 1 >NUL 2>&1
@@ -177,28 +175,29 @@ IF %winversion% == 100 (
 	REG ADD "HKLM\SYSTEM\CurrentControlSet\Control\FileSystem" /F /v DontVerifyRandomDrivers /T REG_DWORD /D 1 >NUL 2>&1
 	REG ADD "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\I/O System" /F /v CountOperations /T REG_DWORD /D 0 >NUL 2>&1
 	
-	
+	CALL :XECHO Disable Automatic Driver Updates
+	REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /F /v ExcludeWUDriversInQualityUpdate /T REG_DWORD /D 1 >NUL 2>&1
 	
 	REG DELETE "HKCU\Software\Microsoft\Windows\CurrentVersion\App Management" /F /v COMClassStore >NUL 2>&1
 	
+	CALL :XECHO Turn off all Windows spotlight features
 	REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent" /F /v DisableWindowsSpotlightFeatures /T REG_DWORD /D 1 >NUL 2>&1
-	REG ADD "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" /F /v NoInstrumentation /T REG_DWORD /D 1 >NUL 2>&1
-	REG ADD "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /F /v EnableFirstLogonAnimation /T REG_DWORD /D 0 >NUL 2>&1
-	REG ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\PeerDist\Service" /F /v HTTPExtension /T REG_DWORD /D 2 >NUL 2>&1
-	REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer" /F /v DisableSearchBoxSuggestions /T REG_DWORD /D 1 >NUL 2>&1
+	
+	CALL :XECHO Disable user tracking
+	REG ADD "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /F /v NoInstrumentation /T REG_DWORD /D 1 >NUL 2>&1
+	
+	CALL :XECHO Disable First Time Sign-in Animation	
+	REG ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /F /v EnableFirstLogonAnimation /T REG_DWORD /D 0 >NUL 2>&1
+	
+	CALL :XECHO Disable Lock Screen
 	REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows\Personalization" /F /v NoLockScreen /T REG_DWORD /D 1 >NUL 2>&1
+	
+	CALL :XECHO DNS Leak fix
 	REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient" /F /v DisableSmartNameResolution /T REG_DWORD /D 1 >NUL 2>&1
+	
+	CALL :XECHO Disable Biometrics
 	REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Biometrics" /F /v Enabled /T REG_DWORD /D 0 >NUL 2>&1
-	IF EXIST "%PROGRAMFILES(X86)%" (
-		REG ADD "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Policies\Explorer" /F /v NoInstrumentation /T REG_DWORD /D 1 >NUL 2>&1
-		REG ADD "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Policies\System" /F /v EnableFirstLogonAnimation /T REG_DWORD /D 0 >NUL 2>&1
-		REG ADD "HKLM\SOFTWARE\WOW6432Node\Policies\Microsoft\Windows\CloudContent" /F /v DisableWindowsSpotlightFeatures /T REG_DWORD /D 1 >NUL 2>&1
-		REG ADD "HKLM\SOFTWARE\WOW6432Node\Policies\Microsoft\Windows\Explorer" /F /v DisableSearchBoxSuggestions /T REG_DWORD /D 1 >NUL 2>&1
-		REG ADD "HKLM\SOFTWARE\WOW6432Node\Policies\Microsoft\Windows\Personalization" /F /v NoLockScreen /T REG_DWORD /D 1 >NUL 2>&1
-		REG ADD "HKLM\SOFTWARE\WOW6432Node\Policies\Microsoft\Windows\WindowsUpdate\AU" /F /v NoAutoUpdate /T REG_DWORD /D 1 >NUL 2>&1
-		REG ADD "HKLM\SOFTWARE\WOW6432Node\Policies\Microsoft\Windows NT\DNSClient" /F /v DisableSmartNameResolution /T REG_DWORD /D 1 >NUL 2>&1
-		REG ADD "HKLM\SOFTWARE\WOW6432Node\Policies\Microsoft\Biometrics" /F /v Enabled /T REG_DWORD /D 0 >NUL 2>&1
-	)
+
 	REG ADD "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config" /F /v DODownloadMode /T REG_DWORD /D 1 >NUL 2>&1
 	REG ADD "HKLM\SOFTWARE\Microsoft\Windows Search\UsnNotifier\Windows\Catalogs\SystemIndex" /F /v {FDF5B5EB-0000-0000-0000-501F00000000} /T REG_SZ /D "9832608" >NUL 2>&1
 	REG ADD "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /F /v UxOption /T REG_DWORD /D 1 >NUL 2>&1
