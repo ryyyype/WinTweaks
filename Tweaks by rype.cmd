@@ -198,12 +198,9 @@ IF %winversion% == 100 (
 	CALL :XECHO Disable Biometrics
 	REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Biometrics" /F /v Enabled /T REG_DWORD /D 0 >NUL 2>&1
 
-	REG ADD "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config" /F /v DODownloadMode /T REG_DWORD /D 1 >NUL 2>&1
-	REG ADD "HKLM\SOFTWARE\Microsoft\Windows Search\UsnNotifier\Windows\Catalogs\SystemIndex" /F /v {FDF5B5EB-0000-0000-0000-501F00000000} /T REG_SZ /D "9832608" >NUL 2>&1
-	REG ADD "HKLM\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" /F /v UxOption /T REG_DWORD /D 1 >NUL 2>&1
-	REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\PcaSvc" /F /v Start /T REG_DWORD /D 4 >NUL 2>&1
-	REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\SysMain" /F /v Start /T REG_DWORD /D 4 >NUL 2>&1
-
+	CALL :XECHO DISABLE Windows Update Delivery Optimization
+	REG ADD "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config" /F /v DODownloadMode /T REG_DWORD /D 0 >NUL 2>&1
+	
 	CALL :XECHO Disable Scheduled Tasks 
 	FOR %%I IN (ProgramDataUpdater Proxy Consolidator KernelCeipTask UsbCeip Microsoft-Windows-DiskDiagnosticDataCollector
 	Microsoft-Windows-DiskDiagnosticResolver WinSAT) DO powershell "Get-ScheduledTask -TaskName %%I | Disable-ScheduledTask" >NUL 2>&1
