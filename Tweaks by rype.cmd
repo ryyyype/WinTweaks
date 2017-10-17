@@ -195,12 +195,17 @@ IF %winversion% == 100 (
 	CALL :XECHO Disable Biometrics
 	REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Biometrics" /F /v Enabled /T REG_DWORD /D 0 >NUL 2>&1
 
-	CALL :XECHO DISABLE Windows Update Delivery Optimization
+	CALL :XECHO Disable Windows Update Delivery Optimization
 	REG ADD "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config" /F /v DODownloadMode /T REG_DWORD /D 0 >NUL 2>&1
 	
 	CALL :XECHO Disable Scheduled Tasks 
 	FOR %%I IN (ProgramDataUpdater Proxy Consolidator KernelCeipTask UsbCeip Microsoft-Windows-DiskDiagnosticDataCollector
 	Microsoft-Windows-DiskDiagnosticResolver WinSAT) DO powershell "Get-ScheduledTask -TaskName %%I | Disable-ScheduledTask" >NUL 2>&1
+	
+	CALL :XECHO Disable some Windows optional features
+	::BACKUP_WINDOWSOPTIONALFEATURES
+	powershell "Get-WindowsOptionalFeature –Online | Where-Object {($_.State –eq 'Enabled') -and (($_.FeatureName -NotMatch 'NetFx*') -and ($_.FeatureName -NotMatch 'MicrosoftWindowsPowerShell*'))} | Format-Table" > %~dp0/BACKUP_WINDOWSOPTIONALFEATURES_"%DATE:~6,4%.%DATE:~3,2%.%DATE:~0,2%-%TIME:~0,2%.%TIME:~3,2%-%TIME:~6,2%".txt
+	powershell "Get-WindowsOptionalFeature –Online | Where-Object {($_.State –eq 'Enabled') -and (($_.FeatureName -NotMatch 'NetFx*') -and ($_.FeatureName -NotMatch 'MicrosoftWindowsPowerShell*'))} | Disable-WindowsOptionalFeature -Online -NoRestart" >NUL 2>&1
 	
 	CALL :XECHO OS visual fx tweaks - less animations
 	REG ADD "HKCU\Control Panel\Desktop\WindowMetrics" /F /v VisualFXSetting /T REG_DWORD /D 3 >NUL 2>&1
@@ -296,11 +301,11 @@ IF %winversion% == 61 (
 	REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" /F /v TcpTimedWaitDelay /T REG_DWORD /D 0x3c >NUL 2>&1
 )
 IF %winversion% == 100 (
-	CALL :XECHO Receive Window Auto-Tuning Level SET to normal
+	CALL :XECHO Receive Window Auto-Tuning Level set to normal
 	powershell "Set-NetTCPSetting -SettingName InternetCustom -AutoTuningLevelLocal Normal" >NUL 2>&1	
 	CALL :XECHO Disable Windows Scaling heuristics
 	powershell "Set-NetTCPSetting -SettingName InternetCustom -ScalingHeuristics Disabled" >NUL 2>&1
-	CALL :XECHO Congestion Control Provider SET to CTCP
+	CALL :XECHO Congestion Control Provider set to CTCP
 	powershell "Set-NetTCPSetting -SettingName InternetCustom -CongestionProvider CTCP" >NUL 2>&1
 	CALL :XECHO Disable TCP Chimney Offload
 	powershell "Set-NetOffloadGlobalSetting -Chimney Disabled" >NUL 2>&1
@@ -309,7 +314,7 @@ IF %winversion% == 100 (
 	CALL :XECHO Disable TCP 1323 Timestamps
 	powershell "Set-NetTCPSetting -SettingName InternetCustom -Timestamps Disabled" >NUL 2>&1
 	CALL :XECHO Enable Direct Cache Access
-	netsh int tcp SET global dca=enabled >NUL 2>&1
+	netsh int tcp set global dca=enabled >NUL 2>&1
 	CALL :XECHO Enable Checksum Offload
 	powershell "Enable-NetAdapterChecksumOffload -Name *" >NUL 2>&1
 	CALL :XECHO Enable Receive-Side Scaling State
@@ -318,7 +323,7 @@ IF %winversion% == 100 (
 	powershell "Disable-NetAdapterRsc -Name *" >NUL 2>&1
 	CALL :XECHO Disable Large Send Offload
 	powershell "Disable-NetAdapterLso -Name *" >NUL 2>&1
-	CALL :XECHO Max SYN Retransmissions SET to 2
+	CALL :XECHO Max SYN Retransmissions set to 2
 	powershell "Set-NetTCPSetting -SettingName InternetCustom -MaxSynRetransmissions 2" >NUL 2>&1
 	CALL :XECHO Disable Non Sack Rtt Resiliency
 	powershell "Set-NetTCPSetting -SettingName InternetCustom -NonSackRttResiliency disabled" >NUL 2>&1
@@ -344,7 +349,7 @@ IF %winversion% == 100 (
 	CALL :XECHO Disable Teredo Tunneling Adapter and other Adapter
 	FOR %%I IN ("Microsoft Kernel Debug Network Adapter" "WAN Miniport" "Teredo Tunneling") DO powershell "Get-PnpDevice | Where-Object { $_.FriendlyName -match '%%I' } | Disable-PnpDevice -Confirm:$false"  >NUL 2>&1
 	CALL :XECHO Disable some network adapter bindings
-	FOR %%I IN (ms_msclient ms_tcpip6 ms_lldp ms_lltdio ms_rspndr ms_server ms_pacer) DO powershell "Get-NetAdapter -physical | where status -eq 'up' | Disable-NetAdapterBinding -ComponentID %%I"  >NUL 2>&1
+	FOR %%I IN (ms_msclient ms_tcpip6 ms_lldp ms_lltdio ms_rspndr ms_server ms_pacer) DO powershell "Get-NetAdapter -physical | Where-Object {$_.Status -eq 'Up'} | Disable-NetAdapterBinding -ComponentID %%I"  >NUL 2>&1
 )
 IF NOT DEFINED AUTOTWEAK GOTO :HOME
 IF DEFINED AUTOTWEAK GOTO :RMONEDRIVE
