@@ -191,10 +191,7 @@ IF %winversion% == 100 (
 	
 	CALL :XECHO Disable Lock Screen
 	REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows\Personalization" /F /v NoLockScreen /T REG_DWORD /D 1 >NUL 2>&1
-	
-	CALL :XECHO DNS Leak fix
-	REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient" /F /v DisableSmartNameResolution /T REG_DWORD /D 1 >NUL 2>&1
-	
+		
 	CALL :XECHO Disable Biometrics
 	REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Biometrics" /F /v Enabled /T REG_DWORD /D 0 >NUL 2>&1
 
@@ -333,7 +330,8 @@ IF %winversion% == 100 (
 	REG ADD "HKLM\SOFTWARE\Microsoft\Internet Explorer\MAIN\FeatureControl\FEATURE_MAXCONNECTIONSPERSERVER" /F /v explorer.exe /T REG_DWORD /D 10 >NUL 2>&1
 	REG ADD "HKLM\SOFTWARE\Microsoft\Internet Explorer\MAIN\FeatureControl\FEATURE_MAXCONNECTIONSPER1_0SERVER" /F /v iexplorer.exe /T REG_DWORD /D 10 >NUL 2>&1
 	REG ADD "HKLM\SOFTWARE\Microsoft\Internet Explorer\MAIN\FeatureControl\FEATURE_MAXCONNECTIONSPERSERVER" /F /v iexplorer.exe /T REG_DWORD /D 10 >NUL 2>&1
-	
+	CALL :XECHO DNS Leak fix
+	REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient" /F /v DisableSmartNameResolution /T REG_DWORD /D 1 >NUL 2>&1
 	
 	FOR %%I IN (MaxNegativeCacheTtl NegativeCacheTime NegativeSOACacheTime NetFailureCacheTime) DO REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters" /F /v %%I /T REG_DWORD /D 0 >NUL 2>&1
 	REG ADD "HKLM\SYSTEM\CurrentControlSet\services\Tcpip\Parameters" /F /v EnableConnectionRateLimiting /T REG_DWORD /D 0 >NUL 2>&1
