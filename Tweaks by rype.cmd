@@ -308,15 +308,15 @@ IF %winversion% == 100 (
 	powershell "Set-NetTCPSetting -SettingName InternetCustom -EcnCapability Disabled" >NUL 2>&1
 	CALL :XECHO Disable TCP 1323 Timestamps
 	powershell "Set-NetTCPSetting -SettingName InternetCustom -Timestamps Disabled" >NUL 2>&1
-	CALL :XECHO Enable Direct Cache Access (DCA)
+	CALL :XECHO Enable Direct Cache Access
 	netsh int tcp SET global dca=enabled >NUL 2>&1
 	CALL :XECHO Enable Checksum Offload
 	powershell "Enable-NetAdapterChecksumOffload -Name *" >NUL 2>&1
-	CALL :XECHO Enable Receive-Side Scaling State (RSS)
+	CALL :XECHO Enable Receive-Side Scaling State
 	powershell "Enable-NetAdapterRss -Name *" >NUL 2>&1
-	CALL :XECHO Disable Receive Segment Coalescing State (RSC)
+	CALL :XECHO Disable Receive Segment Coalescing State
 	powershell "Disable-NetAdapterRsc -Name *" >NUL 2>&1
-	CALL :XECHO Disable Large Send Offload (LSO)
+	CALL :XECHO Disable Large Send Offload
 	powershell "Disable-NetAdapterLso -Name *" >NUL 2>&1
 	CALL :XECHO Max SYN Retransmissions SET to 2
 	powershell "Set-NetTCPSetting -SettingName InternetCustom -MaxSynRetransmissions 2" >NUL 2>&1
@@ -332,15 +332,19 @@ IF %winversion% == 100 (
 	REG ADD "HKLM\SOFTWARE\Microsoft\Internet Explorer\MAIN\FeatureControl\FEATURE_MAXCONNECTIONSPERSERVER" /F /v iexplorer.exe /T REG_DWORD /D 10 >NUL 2>&1
 	CALL :XECHO DNS Leak fix
 	REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient" /F /v DisableSmartNameResolution /T REG_DWORD /D 1 >NUL 2>&1
-	
+	CALL :XECHO Disable Negative DNS Caching
 	FOR %%I IN (MaxNegativeCacheTtl NegativeCacheTime NegativeSOACacheTime NetFailureCacheTime) DO REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters" /F /v %%I /T REG_DWORD /D 0 >NUL 2>&1
+	CALL :XECHO Disable Connection Limits
 	REG ADD "HKLM\SYSTEM\CurrentControlSet\services\Tcpip\Parameters" /F /v EnableConnectionRateLimiting /T REG_DWORD /D 0 >NUL 2>&1
 	REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" /F /v TcpCreateAndConnectTcbRateLimitDepth /T REG_DWORD /D 0 >NUL 2>&1
 	
 	REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\QoS" /F /v "Do not use NLA" /T REG_SZ /D 1 >NUL 2>&1
-	
+	CALL :XECHO Disable Network Data Usage Monitoring
 	REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\Ndu" /F /v Start /T REG_DWORD /D 4 >NUL 2>&1
+	CALL :XECHO Disable Teredo Tunneling Adapter and other Adapter
 	FOR %%I IN ("Microsoft Kernel Debug Network Adapter" "WAN Miniport" "Teredo Tunneling") DO powershell "Get-PnpDevice | Where-Object { $_.FriendlyName -match '%%I' } | Disable-PnpDevice -Confirm:$false"  >NUL 2>&1
+	CALL :XECHO Disable some network adapter bindings
+	FOR %%I IN (ms_msclient ms_tcpip6 ms_lldp ms_lltdio ms_rspndr ms_server ms_pacer) DO powershell "Get-NetAdapter -physical | where status -eq 'up' | Disable-NetAdapterBinding -ComponentID %%I"  >NUL 2>&1
 )
 IF NOT DEFINED AUTOTWEAK GOTO :HOME
 IF DEFINED AUTOTWEAK GOTO :RMONEDRIVE
