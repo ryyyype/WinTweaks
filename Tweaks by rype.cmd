@@ -204,8 +204,8 @@ IF %winversion% == 100 (
 	
 	CALL :XECHO Disable some Windows optional features
 	::BACKUP_WINDOWSOPTIONALFEATURES
-	powershell "Get-WindowsOptionalFeature –Online | Where-Object {($_.State –eq 'Enabled') -and (($_.FeatureName -NotMatch 'NetFx*') -and ($_.FeatureName -NotMatch 'MicrosoftWindowsPowerShell*'))} | Format-Table" > %~dp0/BACKUP_WINDOWSOPTIONALFEATURES_"%DATE:~6,4%.%DATE:~3,2%.%DATE:~0,2%-%TIME:~0,2%.%TIME:~3,2%-%TIME:~6,2%".txt
-	powershell "Get-WindowsOptionalFeature –Online | Where-Object {($_.State –eq 'Enabled') -and (($_.FeatureName -NotMatch 'NetFx*') -and ($_.FeatureName -NotMatch 'MicrosoftWindowsPowerShell*'))} | Disable-WindowsOptionalFeature -Online -NoRestart" >NUL 2>&1
+	powershell "Get-WindowsOptionalFeature -Online | Where-Object {($_.State -eq 'Enabled') -and (($_.FeatureName -NotMatch 'NetFx*') -and ($_.FeatureName -NotMatch 'MicrosoftWindowsPowerShell*'))} | Format-Table" > %~dp0/BACKUP_WINDOWSOPTIONALFEATURES_"%DATE:~6,4%.%DATE:~3,2%.%DATE:~0,2%-%TIME:~0,2%.%TIME:~3,2%-%TIME:~6,2%".txt
+	powershell "Get-WindowsOptionalFeature -Online | Where-Object {($_.State -eq 'Enabled') -and (($_.FeatureName -NotMatch 'NetFx*') -and ($_.FeatureName -NotMatch 'MicrosoftWindowsPowerShell*'))} | Disable-WindowsOptionalFeature -Online -NoRestart"
 	
 	CALL :XECHO OS visual fx tweaks - less animations
 	REG ADD "HKCU\Control Panel\Desktop\WindowMetrics" /F /v VisualFXSetting /T REG_DWORD /D 3 >NUL 2>&1
@@ -267,7 +267,9 @@ IF %winversion% GEQ 61 (
 		REG ADD "HKLM\SYSTEM\CurrentControlSet\services\Tcpip\Parameters\Interfaces\%%I" /F /v TcpDelAckTicks /T REG_DWORD /D 0 >NUL 2>&1
 	)
 	CALL :XECHO Host Resolution Priority Tweak
-	SET /A _tcpservpri_=3 &FOR %%I IN (LocalPriority HostsPriority DnsPriority NetbtPriority Class) DO (SET /A _tcpservpri_+=1 &REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\ServiceProvider" /F /v %%I /T REG_DWORD /D !_tcpservpri_! >NUL 2>&1)
+	SET /A _tcpservpri_=3 &FOR %%I IN (LocalPriority HostsPriority DnsPriority NetbtPriority Class) DO (
+	SET /A _tcpservpri_+=1 &REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\ServiceProvider" /F /v %%I /T REG_DWORD /D !_tcpservpri_! >NUL 2>&1
+	)
 	CALL :XECHO Network Throttling Index Gaming Tweak
 	REG ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /F /v NetworkThrottlingIndex /T REG_DWORD /D 0xFFFFFFFF >NUL 2>&1
 	CALL :XECHO System Responsiveness Gaming Tweak
@@ -347,7 +349,7 @@ IF %winversion% == 100 (
 	CALL :XECHO Disable Network Data Usage Monitoring
 	REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\Ndu" /F /v Start /T REG_DWORD /D 4 >NUL 2>&1
 	CALL :XECHO Disable Teredo Tunneling Adapter and other Adapter
-	FOR %%I IN ("Microsoft Kernel Debug Network Adapter" "WAN Miniport" "Teredo Tunneling") DO powershell "Get-PnpDevice | Where-Object { $_.FriendlyName -match '%%I' } | Disable-PnpDevice -Confirm:$false"  >NUL 2>&1
+	FOR %%I IN ("Microsoft Kernel Debug Network Adapter" "WAN Miniport" "Teredo Tunneling") DO powershell "Get-PnpDevice | Where-Object {$_.FriendlyName -match '%%I'} | Disable-PnpDevice -Confirm:$false"  >NUL 2>&1
 	CALL :XECHO Disable some network adapter bindings
 	FOR %%I IN (ms_msclient ms_tcpip6 ms_lldp ms_lltdio ms_rspndr ms_server ms_pacer) DO powershell "Get-NetAdapter -physical | Where-Object {$_.Status -eq 'Up'} | Disable-NetAdapterBinding -ComponentID %%I"  >NUL 2>&1
 )
@@ -457,7 +459,7 @@ IF DEFINED AUTOTWEAK GOTO :NETTWEAK
 
 
 :DISGRAPHIXSOUND 
-FOR %%I IN ("NVIDIA High Definition Audio") DO powershell "Get-PnpDevice | Where-Object { $_.FriendlyName -match '%%I' } | Disable-PnpDevice -Confirm:$false"  >NUL 2>&1
+FOR %%I IN ("NVIDIA High Definition Audio") DO powershell "Get-PnpDevice | Where-Object {$_.FriendlyName -match '%%I'} | Disable-PnpDevice -Confirm:$false"  >NUL 2>&1
 GOTO :HOME
 
 
@@ -503,22 +505,20 @@ GOTO :HOME
 
 :RMWINAPPS
 CALL :XTITLE REMOVE WINDOWS BLOATWARE APPS
-CALL :XECHO Uninstall Windows Bloatware
-FOR %%I IN (3dbuilder windowsalarms Asphalt8Airborne CandyCrushSaga windowsphone DrawboardPDF
-			getstarted Facebook feedback zunevideo bingfinance photos zunemusic communicationsapps
-			windowscamera windowsmaps people solitairecollection bingnews messaging officehub
-			onenote mspaint windowscalculator skypeapp bingsports soundrecorder StickyNotes dvd
-			xboxIdentityprovider xboxapp sketchbook xing keeper) DO (
-powershell "Get-AppxPackage *%%I* | Remove-AppxPackage" >NUL 2>&1
+CALL :XECHO Uninstall and remove Windows Bloatware
+FOR %%I IN (Twitter Asphalt8Airborne Wallet CandyCrushSaga windowsphone DrawboardPDF Facebook feedback bingfinance bingnews bingsports officehub
+			mspaint dvd sketchbook xing keeper) DO (
+	powershell "Get-AppxPackage *%%I* | Remove-AppxPackage" >NUL 2>&1
 )
-CALL :XECHO Remove Windows Bloatware
-FOR %%I IN (3dbuilder windowsalarms Asphalt8Airborne CandyCrushSaga windowsphone DrawboardPDF
-			getstarted Facebook feedback zunevideo bingfinance photos zunemusic communicationsapps
-			windowscamera windowsmaps people solitairecollection bingnews messaging officehub
-			onenote mspaint windowscalculator skypeapp bingsports soundrecorder StickyNotes dvd
-			xboxIdentityprovider xboxapp sketchbook xing keeper) DO (
-powershell "Get-appxprovisionedpackage -online | Where DisplayName -like *%%I* | remove-appxprovisionedpackage -online" >NUL 2>&1
+FOR %%I IN (3DBuilder BingWeather DesktopAppInstaller Getstarted Messaging MicrosoftOfficeHub MicrosoftSolitaireCollection
+			MicrosoftStickyNotes Office.OneNote OneConnect People SkypeApp StorePurchaseApp Wallet WindowsAlarms WindowsCamera
+			windowscommunicationsapps WindowsFeedbackHub WindowsMaps WindowsSoundRecorder XboxApp XboxGameOverlay XboxIdentityProvider
+			XboxSpeechToTextOverlay ZuneMusic ZuneVideo) DO (
+	powershell "Get-AppxProvisionedPackage -Online | Where-Object {$_.DisplayName -like '*%%I*'} | Remove-AppxProvisionedPackage -Online" >NUL 2>&1
 )
+CALL :XECHO Fixes for some shortcuts
+FTYPE InternetShortcut="C:\Windows\System32\rundll32.exe" "C:\Windows\System32\ieframe.dll",OpenURL %l >NUL 2>&1
+ASSOC .URL=InternetShortcut >NUL 2>&1
 GOTO :HOME
 
 
