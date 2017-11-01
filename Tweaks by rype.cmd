@@ -207,6 +207,10 @@ IF %winversion% == 100 (
 	powershell "Get-WindowsOptionalFeature -Online | Where-Object {($_.State -eq 'Enabled') -and (($_.FeatureName -NotMatch 'NetFx*') -and ($_.FeatureName -NotMatch 'MicrosoftWindowsPowerShell*'))} | Format-Table" > %~dp0/BACKUP_WINDOWSOPTIONALFEATURES_"%DATE:~6,4%.%DATE:~3,2%.%DATE:~0,2%-%TIME:~0,2%.%TIME:~3,2%-%TIME:~6,2%".txt
 	powershell "Get-WindowsOptionalFeature -Online | Where-Object {($_.State -eq 'Enabled') -and (($_.FeatureName -NotMatch 'NetFx*') -and ($_.FeatureName -NotMatch 'MicrosoftWindowsPowerShell*'))} | Disable-WindowsOptionalFeature -Online -NoRestart"
 	
+	CALL :XECHO Fixes for some shortcuts
+	FTYPE InternetShortcut="C:\Windows\System32\rundll32.exe" "C:\Windows\System32\ieframe.dll",OpenURL %l >NUL 2>&1
+	ASSOC .URL=InternetShortcut >NUL 2>&1
+	
 	CALL :XECHO OS visual fx tweaks - less animations
 	REG ADD "HKCU\Control Panel\Desktop\WindowMetrics" /F /v VisualFXSetting /T REG_DWORD /D 3 >NUL 2>&1
 	REG ADD "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" /F /v VisualFXSetting /T REG_DWORD /D 3 >NUL 2>&1
@@ -506,19 +510,26 @@ GOTO :HOME
 :RMWINAPPS
 CALL :XTITLE REMOVE WINDOWS BLOATWARE APPS
 CALL :XECHO Uninstall and remove Windows Bloatware
-FOR %%I IN (Twitter Asphalt8Airborne Wallet CandyCrushSaga windowsphone DrawboardPDF Facebook feedback bingfinance bingnews bingsports officehub
-			mspaint dvd sketchbook xing keeper) DO (
-	powershell "Get-AppxPackage *%%I* | Remove-AppxPackage" >NUL 2>&1
-)
-FOR %%I IN (3DBuilder BingWeather DesktopAppInstaller Getstarted Messaging MicrosoftOfficeHub MicrosoftSolitaireCollection
-			MicrosoftStickyNotes Office.OneNote OneConnect People SkypeApp StorePurchaseApp Wallet WindowsAlarms WindowsCamera
-			windowscommunicationsapps WindowsFeedbackHub WindowsMaps WindowsSoundRecorder XboxApp XboxGameOverlay XboxIdentityProvider
-			XboxSpeechToTextOverlay ZuneMusic ZuneVideo) DO (
+FOR %%I IN (3DBuilder Appconnector BingFinance BingNews BingSports BingWeather Getstarted MicrosoftOfficeHub 
+			MicrosoftSolitaireCollection MicrosoftStickyNotes Office.OneNote OneConnect People SkypeApp
+			WindowsAlarms WindowsCamera WindowsMaps WindowsPhone WindowsSoundRecorder XboxApp ZuneMusic
+			ZuneVideo windowscommunicationsapps MinecraftUWP MicrosoftPowerBIForWindows NetworkSpeedTest
+			CommsPhone ConnectivityStore Messaging Office.Sway OneConnect WindowsFeedbackHub
+			BingFoodAndDrink BingTravel BingHealthAndFitness WindowsReadingList
+			9E2F88E3.Twitter PandoraMediaInc.29680B314EFC2 Flipboard.Flipboard ShazamEntertainmentLtd.Shazam
+			king.com.CandyCrushSaga king.com.CandyCrushSodaSaga king.com. ClearChannelRadioDigital.iHeartRadio
+			4DF9E0F8.Netflix 6Wunderkinder.Wunderlist Drawboard.DrawboardPDF 2FE3CB00.PicsArt-PhotoStudio
+			D52A8D61.FarmVille2CountryEscape TuneIn.TuneInRadio GAMELOFTSA.Asphalt8Airborne
+			DB6EA5DB.CyberLinkMediaSuiteEssentials Facebook.Facebook flaregamesGmbH.RoyalRevolt2
+			Playtika.CaesarsSlotsFreeCasino A278AB0D.MarchofEmpires KeeperSecurityInc.Keeper
+			ThumbmunkeysLtd.PhototasticCollage XINGAG.XING 89006A2E.AutodeskSketchBook
+			D5EA27B7.Duolingo-LearnLanguagesforFree 46928bounde.EclipseManager ActiproSoftwareLLC.562882FEEB491
+			BioEnrollment WindowsFeedback XboxGameCallableUI XboxIdentityProvider ContactSupport) DO (
+	powershell "Get-AppxPackage *%%I* | Remove-AppxPackage -AllUsers" >NUL 2>&1
 	powershell "Get-AppxProvisionedPackage -Online | Where-Object {$_.DisplayName -like '*%%I*'} | Remove-AppxProvisionedPackage -Online" >NUL 2>&1
 )
-CALL :XECHO Fixes for some shortcuts
-FTYPE InternetShortcut="C:\Windows\System32\rundll32.exe" "C:\Windows\System32\ieframe.dll",OpenURL %l >NUL 2>&1
-ASSOC .URL=InternetShortcut >NUL 2>&1
+CALL :XECHO Disable Consumer Features
+REG ADD "HKLM\Software\Policies\Microsoft\Windows\CloudContent" /F /v DisableWindowsConsumerFeatures /T REG_DWORD /D 1 >NUL 2>&1
 GOTO :HOME
 
 
