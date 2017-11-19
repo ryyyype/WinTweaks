@@ -15,6 +15,8 @@ IF NOT ERRORLEVEL 1 (
         exit
 )
 
+COLOR 0A
+MODE con lines=40 cols=59
 FOR /F "TOKENS=4-7 DELIMS=[.] " %%i IN ('ver') DO (IF %%i==Version (SET winversion=%%j%%k) ELSE (SET winversion=%%i%%j))
 FOR /F "TOKENS=1,* DELIMS==" %%u IN ('WMIC OS GET CAPTION /VALUE') DO IF /I "%%u"=="Caption" SET winedition=%%v
 SET winedition=%winedition:~10%
@@ -42,7 +44,7 @@ CALL :XMENU Automatic Tweaks and Anti-Spy
 ECHO.
 
 
-SET /p web=Type option:
+SET /p web="Type option: "
 IF "%web%"=="1" GOTO :SVCMENU
 IF "%web%"=="2" GOTO :SYSTWEAK
 IF "%web%"=="3" GOTO :NETTWEAK
@@ -69,7 +71,7 @@ ECHO.
 IF %winversion% == 100 (
 	CALL :XSVCTOKEN
 )
-SET /p web=Type option:
+SET /p web="Type option: "
 IF "%web%"=="1" GOTO :SVCSAFE
 IF "%web%"=="2" GOTO :SVCTWEAKED
 IF "%web%"=="3" GOTO :SVCDEFAULT
@@ -153,6 +155,9 @@ IF %winversion% == 100 (
 	CALL :XECHO Disable the Windows Update feature
 	REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /F /v NoAutoUpdate /T REG_DWORD /D 1 >NUL 2>&1
 	
+	CALL :XECHO Remove Contacs from taskbar
+	REG ADD "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /F /v PeopleBand /T REG_DWORD /D 0 >NUL 2>&1
+		
 	CALL :XECHO OS compatibility tweaks - crash, data collection, timeouts, game priority
 	fsutil behavior set disable8dot3 1 >NUL 2>&1
 	REG ADD "HKCU\Control Panel\Desktop" /F /v HungAppTimeout /T REG_SZ /D 4000 >NUL 2>&1
@@ -238,7 +243,9 @@ CALL :XTITLE GENERAL NETWORK TWEAKS
 CALL :XECHO HW network driver tweaks - flow control, buffers, offload processing
 FOR /F "tokens=3*" %%I IN ('REG QUERY "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkCards" /F "ServiceName" /S^|FINDSTR /I /L "ServiceName"') DO (
 FOR /F %%A IN ('REG QUERY "HKLM\SYSTEM\CurrentControlSet\Control\Class\{4D36E972-E325-11CE-BFC1-08002BE10318}" /F "%%I" /D /E /S ^|FINDSTR /I /L /V "Linkage"^|FINDSTR /I /L "\\Class\\"') DO SET "REGPATH=%%A" >NUL 2>&1
-	FOR %%n IN (#FlowControl #InterruptModeration #LsoV1IPv4 #LsoV2IPv4 #LsoV2IPv6 #PMARPOffload #PMNSOffload #WakeOnMagicPacket #WakeOnPattern AdaptiveIFS EEELinkAdvertisement EnablePME ITR MasterSlave WaitAutoNegComplete) DO (
+	FOR %%n IN (#FlowControl #InterruptModeration #LsoV1IPv4 #LsoV2IPv4 #LsoV2IPv6 #PMARPOffload #PMNSOffload 
+				#WakeOnMagicPacket #WakeOnPattern AdaptiveIFS EEELinkAdvertisement EnablePME MasterSlave 
+				WaitAutoNegComplete ULPMode ReduceSpeedOnPowerDown ITR EnableTss) DO (
 		SET opt=%%n
 		SET opt=!opt:#=*!
 		REG QUERY "!REGPATH!" /V !opt! >NUL 2>&1
@@ -261,6 +268,10 @@ FOR /F %%A IN ('REG QUERY "HKLM\SYSTEM\CurrentControlSet\Control\Class\{4D36E972
 	IF NOT ERRORLEVEL 1 REG ADD "!REGPATH!" /F /V "*SSIdleTimeout" /T REG_SZ /D 60 >NUL 2>&1
 	REG QUERY "!REGPATH!" /V "LogLinkStateEvent" >NUL 2>&1
 	IF NOT ERRORLEVEL 1 REG ADD "!REGPATH!" /F /V "LogLinkStateEvent" /T REG_SZ /D 16 >NUL 2>&1
+	REG QUERY "!REGPATH!" /V "*TransmitBuffers" >NUL 2>&1
+	IF NOT ERRORLEVEL 1 REG ADD "!REGPATH!" /F /V "*ReceiveBuffers" /T REG_SZ /D 96 >NUL 2>&1
+	REG QUERY "!REGPATH!" /V "*TransmitBuffers" >NUL 2>&1
+	IF NOT ERRORLEVEL 1 REG ADD "!REGPATH!" /F /V "*TransmitBuffers" /T REG_SZ /D 96 >NUL 2>&1
 )
 :: Speedguide.net tweaks
 IF %winversion% GEQ 61 (
@@ -514,17 +525,18 @@ FOR %%I IN (3DBuilder Appconnector BingFinance BingNews BingSports BingWeather G
 			MicrosoftSolitaireCollection MicrosoftStickyNotes Office.OneNote OneConnect People SkypeApp
 			WindowsAlarms WindowsCamera WindowsMaps WindowsPhone WindowsSoundRecorder XboxApp ZuneMusic
 			ZuneVideo windowscommunicationsapps MinecraftUWP MicrosoftPowerBIForWindows NetworkSpeedTest
-			CommsPhone ConnectivityStore Messaging Office.Sway OneConnect WindowsFeedbackHub
-			BingFoodAndDrink BingTravel BingHealthAndFitness WindowsReadingList
+			CommsPhone ConnectivityStore Messaging Office.Sway OneConnect WindowsFeedbackHub HolographicFirstRun
+			BingFoodAndDrink BingTravel BingHealthAndFitness WindowsReadingList Microsoft3DViewer
 			9E2F88E3.Twitter PandoraMediaInc.29680B314EFC2 Flipboard.Flipboard ShazamEntertainmentLtd.Shazam
 			king.com.CandyCrushSaga king.com.CandyCrushSodaSaga king.com. ClearChannelRadioDigital.iHeartRadio
 			4DF9E0F8.Netflix 6Wunderkinder.Wunderlist Drawboard.DrawboardPDF 2FE3CB00.PicsArt-PhotoStudio
-			D52A8D61.FarmVille2CountryEscape TuneIn.TuneInRadio GAMELOFTSA.Asphalt8Airborne
-			DB6EA5DB.CyberLinkMediaSuiteEssentials Facebook.Facebook flaregamesGmbH.RoyalRevolt2
-			Playtika.CaesarsSlotsFreeCasino A278AB0D.MarchofEmpires KeeperSecurityInc.Keeper
-			ThumbmunkeysLtd.PhototasticCollage XINGAG.XING 89006A2E.AutodeskSketchBook
+			D52A8D61.FarmVille2CountryEscape TuneIn.TuneInRadio GAMELOFTSA.Asphalt8Airborne Xbox.TCUI
+			DB6EA5DB.CyberLinkMediaSuiteEssentials Facebook.Facebook flaregamesGmbH.RoyalRevolt2 GetHelp
+			Playtika.CaesarsSlotsFreeCasino A278AB0D.MarchofEmpires KeeperSecurityInc.Keeper Print3D
+			ThumbmunkeysLtd.PhototasticCollage XINGAG.XING 89006A2E.AutodeskSketchBook HEVCVideoExtension
 			D5EA27B7.Duolingo-LearnLanguagesforFree 46928bounde.EclipseManager ActiproSoftwareLLC.562882FEEB491
-			BioEnrollment WindowsFeedback XboxGameCallableUI XboxIdentityProvider ContactSupport) DO (
+			BioEnrollment WindowsFeedback XboxGameCallableUI XboxIdentityProvider ContactSupport
+			XboxSpeechToTextOverlay) DO (
 	powershell "Get-AppxPackage *%%I* | Remove-AppxPackage -AllUsers" >NUL 2>&1
 	powershell "Get-AppxProvisionedPackage -Online | Where-Object {$_.DisplayName -like '*%%I*'} | Remove-AppxProvisionedPackage -Online" >NUL 2>&1
 )
@@ -645,7 +657,7 @@ IF %winversion% == 100 (
 	ECHO.
 
 
-	SET /p web=Type option:
+	SET /p web="Type option: "
 	IF "%web%"=="1" GOTO :SVCSAFEDESK
 	IF "%web%"=="2" GOTO :SVCSAFELAPTAB
 )
@@ -680,11 +692,11 @@ GOTO :HOME
 :SVCTWEAKED
 IF %winversion% == 100 (
 	::Automatic
-	FOR %%I IN (BITS BrokerInfrastructure BFE EventSystem CDPSvc CDPUserSvc_%service% DiagTrack 
-	CoreMessagingRegistrar CryptSvc DusmSvc DcomLaunch DoSvc Dhcp DPS TrkWks Dnscache gpsvc 
-	LSM NlaSvc nsi Power Spooler PcaSvc RpcSs RpcEptMapper SamSs wscsvc LanmanServer ShellHWDetection 
-	sppsvc SysMain OneSyncSvc_%service% SENS SystemEventsBroker Schedule Themes tiledatamodelsvc 
-	UserManager ProfSvc AudioSrv AudioEndpointBuilder Wcmsvc WinDefend SecurityHealthService 
+	FOR %%I IN (BITS BrokerInfrastructure BFE EventSystem CDPSvc CDPUserSvc_%service%
+	CoreMessagingRegistrar CryptSvc DusmSvc DcomLaunch DoSvc Dhcp DPS Dnscache gpsvc
+	LSM NlaSvc nsi Power Spooler PcaSvc RpcSs RpcEptMapper SamSs LanmanServer ShellHWDetection
+	sppsvc SysMain OneSyncSvc_%service% SENS SystemEventsBroker Schedule Themes tiledatamodelsvc
+	UserManager ProfSvc AudioSrv AudioEndpointBuilder Wcmsvc WinDefend SecurityHealthService
 	EventLog MpsSvc FontCache Winmgmt WpnService WSearch LanmanWorkstation) DO (
 		REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >NUL 2>&1
 		IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 2 >NUL 2>&1)
@@ -692,14 +704,13 @@ IF %winversion% == 100 (
 	FOR %%I IN (AxInstSV AppReadiness AppIDSvc Appinfo AppXSVC BDESVC wbengine ClipSVC KeyIso 
 	COMSysApp Browser PimIndexMaintenanceSvc_%service% VaultSvc DsSvc DeviceAssociationService 
 	DeviceInstall DmEnrollmentSvc DsmSVC DevicesFlowUserSvc_%service% DevQueryBroker WdiServiceHost 
-	WdiSystemHost MSDTC embeddedmode EFS EntAppSvc EapHost fhsvc fdPHost FDResPub HomeGroupListener 
-	HomeGroupProvider hidserv IKEEXT UI0Detect PolicyAgent KtmRm lltdsvc MessagingService_%service% 
-	diagnosticshub.standardcollector.service wlidsvc NgcSvc NgcCtnrSvc swprv smphost NcbService 
-	Netman NcaSVC netprofm NetSetupSvc defragsvc PNRPsvc p2psvc p2pimsvc PerfHost pla PlugPlay 
-	PNRPAutoReg WPDBusEnum PrintNotify wercplsupport QWAVE RmSvc RasAuto RasMan seclogon SstpSvc 
-	svsvc StateRepository WiaRpc StorSvc TieringEngineService lmhosts TapiSrv TimeBroker 
-	TokenBroker UsoSvc upnphost UserDataSvc_%service% UnistoreSvc_%service% vds VSS WalletService SDRSVC 
-	WbioSrvc Sense WdNisSvc wudfsvc WEPHOSTSVC WerSvc Wecsvc StiSvc msiserver LicenseManager 
+	WdiSystemHost MSDTC embeddedmode EFS EntAppSvc EapHost fhsvc fdPHost FDResPub hidserv IKEEXT 
+	UI0Detect PolicyAgent KtmRm lltdsvc MessagingService_%service% wlidsvc NgcSvc NgcCtnrSvc 
+	swprv smphost NcbService Netman NcaSVC netprofm NetSetupSvc defragsvc PNRPsvc p2psvc p2pimsvc
+	PerfHost pla PlugPlay PNRPAutoReg WPDBusEnum PrintNotify wercplsupport QWAVE RmSvc RasAuto 
+	RasMan seclogon SstpSvc svsvc StateRepository WiaRpc StorSvc TieringEngineService lmhosts TapiSrv 
+	TimeBroker TokenBroker UsoSvc upnphost UserDataSvc_%service% UnistoreSvc_%service% vds VSS 
+	WalletService SDRSVC Sense wudfsvc WEPHOSTSVC WerSvc Wecsvc StiSvc msiserver LicenseManager 
 	TrustedInstaller WpnUserService_%service% W32Time wuauserv WinHttpAutoProxySvc dot3svc WlanSvc 
 	wmiApSrv XboxGipSvc) DO (
 		REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >NUL 2>&1
@@ -712,7 +723,9 @@ IF %winversion% == 100 (
 	SEMgrSvc PhoneSvc SessionEnv TermService UmRdpService RpcLocator RemoteRegistry RetailDemo 
 	RemoteAccess SensorDataService SensrSvc SensorService shpamsvc SCardSvr ScDeviceEnum SCPolicySvc 
 	SNMPTRAP SSDPSRV TabletInputService UevAgentService WebClient WFDSConSvc FrameServer wcncsvc wisvc 
-	WMPNetworkSvc icssvc WinRM WwanSvc XblAuthManager XblGameSave XboxNetApiSvc) DO (
+	WMPNetworkSvc icssvc WinRM WwanSvc XblAuthManager XblGameSave XboxNetApiSvc
+	diagnosticshub.standardcollector.service DiagTrack dmwappushservice HomeGroupListener NetTcpPortSharing
+	TrkWks WbioSrvc wscsvc WdNisSvc) DO (
 		REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >NUL 2>&1
 		IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 4 >NUL 2>&1)
 )
