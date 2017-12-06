@@ -40,6 +40,8 @@ CALL :XMENU Uninstall razer Stats
 IF %winversion% == 100 (CALL :XMENU Remove Windows 10 Apps) ELSE (CALL :XMENU N/A)
 IF %winversion% == 100 (CALL :XMENU Remove OneDrive) ELSE (CALL :XMENU N/A)
 IF %winversion% == 100 (CALL :XMENU Disable Telemetry) ELSE (CALL :XMENU N/A)
+CALL :XMENU Windows Cleaner
+CALL :XMENU Remove unused Drivers
 CALL :XMENU Automatic Tweaks and Anti-Spy
 ECHO.
 
@@ -55,9 +57,10 @@ IF "%web%"=="7" GOTO :UNINSTALLRZSTATS
 IF %winversion% == 100 (IF "%web%"=="8" GOTO :RMWINAPPS)
 IF %winversion% == 100 (IF "%web%"=="9" GOTO :RMONEDRIVE)
 IF %winversion% == 100 (IF "%web%"=="10" GOTO :RMTELEMETRY)
-IF "%web%"=="11" GOTO :AUTOTWEAKS
+IF "%web%"=="11" GOTO :CLEANER
+IF "%web%"=="12" GOTO :UNUSEDDRIVER
+IF "%web%"=="13" GOTO :AUTOTWEAKS
 GOTO :HOME
-
 
 :SVCMENU
 CALL :XTITLE SERVICE TWEAKS BY Black Viper - www.blackviper.com
@@ -209,8 +212,34 @@ IF %winversion% == 100 (
 	
 	CALL :XECHO Set Sound Scheme to No Sounds
 	REG ADD "HKCU\AppEvents\Schemes" /F /v "" /T REG_SZ /D ".None" >NUL 2>&1
+	REG ADD "HKCU\AppEvents\Schemes\Apps\.Default\.Default\.Current" /F /v "" /T REG_SZ /D "" >NUL 2>&1
+	REG ADD "HKCU\AppEvents\Schemes\Apps\.Default\CriticalBatteryAlarm\.Current" /F /v "" /T REG_SZ /D "" >NUL 2>&1
+	REG ADD "HKCU\AppEvents\Schemes\Apps\.Default\DeviceConnect\.Current" /F /v "" /T REG_SZ /D "" >NUL 2>&1
+	REG ADD "HKCU\AppEvents\Schemes\Apps\.Default\DeviceDisconnect\.Current" /F /v "" /T REG_SZ /D "" >NUL 2>&1
+	REG ADD "HKCU\AppEvents\Schemes\Apps\.Default\DeviceFail\.Current" /F /v "" /T REG_SZ /D "" >NUL 2>&1
+	REG ADD "HKCU\AppEvents\Schemes\Apps\.Default\FaxBeep\.Current" /F /v "" /T REG_SZ /D "" >NUL 2>&1
+	REG ADD "HKCU\AppEvents\Schemes\Apps\.Default\LowBatteryAlarm\.Current" /F /v "" /T REG_SZ /D "" >NUL 2>&1
+	REG ADD "HKCU\AppEvents\Schemes\Apps\.Default\MailBeep\.Current" /F /v "" /T REG_SZ /D "" >NUL 2>&1
+	REG ADD "HKCU\AppEvents\Schemes\Apps\.Default\MessageNudge\.Current" /F /v "" /T REG_SZ /D "" >NUL 2>&1
+	REG ADD "HKCU\AppEvents\Schemes\Apps\.Default\Notification.Default\.Current" /F /v "" /T REG_SZ /D "" >NUL 2>&1
+	REG ADD "HKCU\AppEvents\Schemes\Apps\.Default\Notification.IM\.Current" /F /v "" /T REG_SZ /D "" >NUL 2>&1
+	REG ADD "HKCU\AppEvents\Schemes\Apps\.Default\Notification.Mail\.Current" /F /v "" /T REG_SZ /D "" >NUL 2>&1
+	REG ADD "HKCU\AppEvents\Schemes\Apps\.Default\Notification.Proximity\.Current" /F /v "" /T REG_SZ /D "" >NUL 2>&1
+	REG ADD "HKCU\AppEvents\Schemes\Apps\.Default\Notification.Reminder\.Current" /F /v "" /T REG_SZ /D "" >NUL 2>&1
+	REG ADD "HKCU\AppEvents\Schemes\Apps\.Default\Notification.SMS\.Current" /F /v "" /T REG_SZ /D "" >NUL 2>&1
+	REG ADD "HKCU\AppEvents\Schemes\Apps\.Default\ProximityConnection\.Current" /F /v "" /T REG_SZ /D "" >NUL 2>&1
+	REG ADD "HKCU\AppEvents\Schemes\Apps\.Default\SystemAsterisk\.Current" /F /v "" /T REG_SZ /D "" >NUL 2>&1
+	REG ADD "HKCU\AppEvents\Schemes\Apps\.Default\SystemExclamation\.Current" /F /v "" /T REG_SZ /D "" >NUL 2>&1
+	REG ADD "HKCU\AppEvents\Schemes\Apps\.Default\SystemHand\.Current" /F /v "" /T REG_SZ /D "" >NUL 2>&1
+	REG ADD "HKCU\AppEvents\Schemes\Apps\.Default\SystemNotification\.Current" /F /v "" /T REG_SZ /D "" >NUL 2>&1
+	REG ADD "HKCU\AppEvents\Schemes\Apps\.Default\WindowsUAC\.Current" /F /v "" /T REG_SZ /D "" >NUL 2>&1
+	REG ADD "HKCU\AppEvents\Schemes\Apps\sapisvr\DisNumbersSound\.Current" /F /v "" /T REG_SZ /D "" >NUL 2>&1
+	REG ADD "HKCU\AppEvents\Schemes\Apps\sapisvr\HubOffSound\.Current" /F /v "" /T REG_SZ /D "" >NUL 2>&1
+	REG ADD "HKCU\AppEvents\Schemes\Apps\sapisvr\HubOnSound\.Current" /F /v "" /T REG_SZ /D "" >NUL 2>&1
+	REG ADD "HKCU\AppEvents\Schemes\Apps\sapisvr\HubSleepSound\.Current" /F /v "" /T REG_SZ /D "" >NUL 2>&1
+	REG ADD "HKCU\AppEvents\Schemes\Apps\sapisvr\MisrecoSound\.Current" /F /v "" /T REG_SZ /D "" >NUL 2>&1
+	REG ADD "HKCU\AppEvents\Schemes\Apps\sapisvr\PanelSound\.Current" /F /v "" /T REG_SZ /D "" >NUL 2>&1
 	
-
 	CALL :XECHO Hide Mobile and Windows Insider in Options
 	REG ADD "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" /F /v "SettingsPageVisibility" /T REG_SZ /D "hide:mobile-devices;windowsinsider" >NUL 2>&1
 	
@@ -597,8 +626,6 @@ REG DELETE "HKEY_CLASSES_ROOT\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" /f >
 REG DELETE "HKEY_CLASSES_ROOT\Wow6432Node\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" /f > NUL 2>&1
 IF NOT DEFINED AUTOTWEAK GOTO :HOME
 IF DEFINED AUTOTWEAK GOTO :RMTELEMETRY
-
-:8 
 GOTO :HOME
 
 
@@ -670,6 +697,17 @@ IF NOT DEFINED AUTOTWEAK (
 CALL :XDONE
 GOTO :eof
 
+:CLEANER
+powershell -ExecutionPolicy Bypass "& '%~dp0\resources\WindowsCleanup.ps1'"
+GOTO :HOME
+
+:UNUSEDDRIVER
+IF EXIST %ProgramFiles(x86)% (
+	CALL %~dp0\resources\x64\DeviceCleanupCmd.exe * -m:14d
+) ELSE (
+	CALL %~dp0\resources\x86\DeviceCleanupCmd.exe * -m:14d
+)
+GOTO :HOME
 
 ::::::::::::::::::::::::::::::::
 :: WINDOWS SVC BY Black Viper ::
