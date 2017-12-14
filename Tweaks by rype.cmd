@@ -116,7 +116,6 @@ IF %winversion% == 61 (
 	REG ADD "HKLM\SYSTEM\CurrentControlSet\Control\FileSystem" /F /v DontVerifyRandomDrivers /T REG_DWORD /D 1 >NUL 2>&1
 	REG ADD "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\I/O System" /F /v CountOperations /T REG_DWORD /D 0 >NUL 2>&1
 	REG ADD "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /F /v "DisablePagingExecutive" /T REG_DWORD /D 1 >NUL 2>&1
-	REG DELETE "HKCU\Software\Microsoft\Windows\CurrentVersion\App Management" /F /v COMClassStore >NUL 2>&1
 	SC config "AeLookupSvc" start= demand >NUL 2>&1
 	SC start "AeLookupSvc" >NUL 2>&1 
 	
@@ -139,61 +138,99 @@ IF %winversion% == 61 (
 IF %winversion% == 100 (
 	CALL :XECHO Disable Hibernate
 	powercfg -h off >NUL 2>&1
-		
-	CALL :XECHO Remove search box from taskbar
-	REG ADD "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /F /v SearchboxTaskbarMode /T REG_DWORD /D 0 >NUL 2>&1
 	
-	CALL :XECHO File Explorer opens at "This PC"
+	CALL :XECHO File Explorer Opens At "This PC"
 	REG ADD "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /F /v LaunchTo /T REG_DWORD /D 1 >NUL 2>&1
-	
-	CALL :XECHO Turn off Windows SmartScreen
-	REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /F /v EnableSmartScreen /T REG_DWORD /D 0 >NUL 2>&1
-	
-	CALL :XECHO Remove Quick Access from File Explorer navigation pane
-	REG ADD "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" /f /v HubMode /t REG_DWORD /d 1 >NUL 2>&1
 	
 	CALL :XECHO Disable File Explorer Search Suggestions
 	REG ADD "HKCU\Software\Policies\Microsoft\Windows\Explorer" /F /v DisableSearchBoxSuggestions /T REG_DWORD /D 1 >NUL 2>&1
 	
-	CALL :XECHO Disable the Windows Update feature
-	REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /F /v NoAutoUpdate /T REG_DWORD /D 1 >NUL 2>&1
+	CALL :XECHO Remove Quick Access From File Explorer Navigation Pane
+	REG ADD "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" /f /v HubMode /T REG_DWORD /D 1 >NUL 2>&1
 	
-	CALL :XECHO Remove Contacs from taskbar
+	CALL :XECHO Remove 3D-Objects, Music, Pictures and Video Folders
+	::3D-Objects
+	REG DELETE "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{0DB7E03F-FC29-4DC6-9020-FF41B59E513A}" /F >NUL 2>&1
+	::Music
+	REG DELETE "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{1CF1260C-4DD0-4ebb-811F-33C572699FDE}" /F >NUL 2>&1
+	REG DELETE "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{3dfdf296-dbec-4fb4-81d1-6a3438bcf4de}" /F >NUL 2>&1
+	::Pictures
+	REG DELETE "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{3ADD1653-EB32-4cb0-BBD7-DFA0ABB5ACCA}" /F >NUL 2>&1
+	REG DELETE "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{24ad3ad4-a569-4530-98e1-ab02f9417aa8}" /F >NUL 2>&1
+	::Video
+	REG DELETE "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{A0953C92-50DC-43bf-BE83-3742FED03C9C}" /F >NUL 2>&1
+	REG DELETE "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{f86fa3ab-70d2-4fc7-9c99-fcbf05467f3a}" /F >NUL 2>&1
+	
+	CALL :XECHO Remove Search Box From Taskbar
+	REG ADD "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /F /v SearchboxTaskbarMode /T REG_DWORD /D 0 >NUL 2>&1
+	
+	CALL :XECHO Remove Contacs From Taskbar
 	REG ADD "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /F /v PeopleBand /T REG_DWORD /D 0 >NUL 2>&1
-		
-	CALL :XECHO OS compatibility tweaks - crash, data collection, timeouts, game priority
+	
+	CALL :XECHO Disable 8.3 File Name Creation
 	fsutil behavior set disable8dot3 1 >NUL 2>&1
+	
+	CALL :XECHO Speed Up Timeout Waiting Time For Applications
 	REG ADD "HKCU\Control Panel\Desktop" /F /v HungAppTimeout /T REG_SZ /D 4000 >NUL 2>&1
-	REG ADD "HKCU\Control Panel\Desktop" /F /v LowLevelHooksTimeout /T REG_SZ /D 5000 >NUL 2>&1
-	REG ADD "HKCU\Control Panel\Desktop" /F /v MenuShowDelay /T REG_SZ /D 0 >NUL 2>&1
+	
+	CALL :XECHO Speed Up Shut Down Time
 	REG ADD "HKCU\Control Panel\Desktop" /F /v WaitToKillAppTimeout /T REG_SZ /D 5000 >NUL 2>&1
+	
+	CALL :XECHO Speed Up End Not Responding Services
+	REG ADD "HKCU\Control Panel\Desktop" /F /v LowLevelHooksTimeout /T REG_SZ /D 5000 >NUL 2>&1
+	
+	CALL :XECHO Speed Up Menu Display Time
+	REG ADD "HKCU\Control Panel\Desktop" /F /v MenuShowDelay /T REG_SZ /D 0 >NUL 2>&1
+	
+	CALL :XECHO Disable Restrict Implicit Ink Collection
 	REG ADD "HKCU\Software\Microsoft\InputPersonalization" /F /v RestrictImplicitInkCollection /T REG_DWORD /D 1 >NUL 2>&1
+	
+	CALL :XECHO Disable Restrict Implicit Text Collection
 	REG ADD "HKCU\Software\Microsoft\InputPersonalization" /F /v RestrictImplicitTextCollection /T REG_DWORD /D 1 >NUL 2>&1
-	REG ADD "HKCU\Software\Microsoft\Windows\CurrentVersion\AppHost" /F /v EnableWebContentEvaluation /T REG_DWORD /D 0 >NUL 2>&1
+	
+	CALL :XECHO Disable Program Compatibility Assistant
 	REG ADD "HKCU\Software\Policies\Microsoft\Windows\AppCompat" /F /v DisablePCA /T REG_DWORD /D 1 >NUL 2>&1
+	
+	CALL :XECHO Disable Tracking App Usage
 	REG ADD "HKCU\Software\Policies\Microsoft\Windows\EdgeUI" /F /v DisableMFUTracking /T REG_DWORD /D 1 >NUL 2>&1
+	
+	CALL :XECHO Set Priority In Games
 	REG ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" /F /v "Affinity" /T REG_DWORD /D 0 >NUL 2>&1
 	REG ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" /F /v "Background Only" /T REG_SZ /D "False" >NUL 2>&1
-	REG ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" /F /v "GPU Priority" /T REG_DWORD /D 1 >NUL 2>&1
-	REG ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" /F /v "Priority" /T REG_DWORD /D 1 >NUL 2>&1
+	REG ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" /F /v "Clock Rate" /T REG_DWORD /D 10000 >NUL 2>&1
+	REG ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" /F /v "GPU Priority" /T REG_DWORD /D 8 >NUL 2>&1
+	REG ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" /F /v "Priority" /T REG_DWORD /D 2 >NUL 2>&1
 	REG ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" /F /v "Scheduling Category" /T REG_SZ /D "High" >NUL 2>&1
 	REG ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" /F /v "SFIO Priority" /T REG_SZ /D "High" >NUL 2>&1
+	
+	CALL :XECHO Set System Crash Dump Behavior to 3 (Small Dumps)
 	REG ADD "HKLM\SOFTWARE\Microsoft\Windows\Windows Error Reporting" /F /v CrashDumpEnabled /T REG_DWORD /D 3 >NUL 2>&1
 	REG ADD "HKLM\SYSTEM\CurrentControlSet\Control\CrashControl" /F /v CrashDumpEnabled /T REG_DWORD /D 3 >NUL 2>&1
+	
+	CALL :XECHO Disable Random Driver Verification
 	REG ADD "HKLM\SYSTEM\CurrentControlSet\Control\FileSystem" /F /v DontVerifyRandomDrivers /T REG_DWORD /D 1 >NUL 2>&1
+	
+	CALL :XECHO Disable System And Process Level I/O Counters
 	REG ADD "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\I/O System" /F /v CountOperations /T REG_DWORD /D 0 >NUL 2>&1
 	
-	CALL :XECHO Disable Automatic Driver Updates
-	REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /F /v ExcludeWUDriversInQualityUpdate /T REG_DWORD /D 1 >NUL 2>&1
+	CALL :XECHO Disable Game Bar
+	REG ADD "HKCU\Software\Microsoft\Windows\CurrentVersion\GameDVR" /F /v AppCaptureEnabled /T REG_DWORD /D 0 >NUL 2>&1
+	REG ADD "HKCU\System\GameConfigStore" /F /v GameDVR_Enabled /T REG_DWORD /D 0 >NUL 2>&1
 	
-	CALL :XECHO Turn off all Windows spotlight features
+	CALL :XECHO Disable Windows Spotlight Features
 	REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent" /F /v DisableWindowsSpotlightFeatures /T REG_DWORD /D 1 >NUL 2>&1
 	
-	CALL :XECHO Disable user tracking
+	CALL :XECHO Disable User Tracking
 	REG ADD "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /F /v NoInstrumentation /T REG_DWORD /D 1 >NUL 2>&1
 	
 	CALL :XECHO Disable Notification Center
 	REG ADD "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /F /v DisableNotificationCenter /T REG_DWORD /D 1 >NUL 2>&1
+	
+	CALL :XECHO Disable Windows SmartScreen
+	REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /F /v EnableSmartScreen /T REG_DWORD /D 0 >NUL 2>&1
+	
+	CALL :XECHO Disable "Turn on SmartScreen Filter"
+	REG ADD "HKCU\Software\Microsoft\Windows\CurrentVersion\AppHost" /F /v EnableWebContentEvaluation /T REG_DWORD /D 0 >NUL 2>&1
 	
 	CALL :XECHO Disable First Time Sign-in Animation	
 	REG ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /F /v EnableFirstLogonAnimation /T REG_DWORD /D 0 >NUL 2>&1
@@ -204,13 +241,21 @@ IF %winversion% == 100 (
 	CALL :XECHO Disable Biometrics
 	REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Biometrics" /F /v Enabled /T REG_DWORD /D 0 >NUL 2>&1
 
+	CALL :XECHO Disable the Windows Update feature
+	REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /F /v NoAutoUpdate /T REG_DWORD /D 1 >NUL 2>&1
+	
 	CALL :XECHO Disable Windows Update Delivery Optimization
 	REG ADD "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config" /F /v DODownloadMode /T REG_DWORD /D 0 >NUL 2>&1
+	IF EXIST %ProgramFiles(x86)% (
+		REG ADD "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config" /F /v DODownloadMode /T REG_DWORD /D 0 >NUL 2>&1
+	)
+	CALL :XECHO Disable Automatic Driver Updates
+	REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /F /v ExcludeWUDriversInQualityUpdate /T REG_DWORD /D 1 >NUL 2>&1
 	
 	CALL :XECHO Disable Windows Startup Sound
 	REG ADD "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\BootAnimation" /F /v DisableStartupSound /T REG_DWORD /D 1 >NUL 2>&1
 	
-	CALL :XECHO Set Sound Scheme to No Sounds
+	CALL :XECHO Set Sound Scheme To No Sounds
 	REG ADD "HKCU\AppEvents\Schemes" /F /v "" /T REG_SZ /D ".None" >NUL 2>&1
 	REG ADD "HKCU\AppEvents\Schemes\Apps\.Default\.Default\.Current" /F /v "" /T REG_SZ /D "" >NUL 2>&1
 	REG ADD "HKCU\AppEvents\Schemes\Apps\.Default\CriticalBatteryAlarm\.Current" /F /v "" /T REG_SZ /D "" >NUL 2>&1
@@ -240,36 +285,46 @@ IF %winversion% == 100 (
 	REG ADD "HKCU\AppEvents\Schemes\Apps\sapisvr\MisrecoSound\.Current" /F /v "" /T REG_SZ /D "" >NUL 2>&1
 	REG ADD "HKCU\AppEvents\Schemes\Apps\sapisvr\PanelSound\.Current" /F /v "" /T REG_SZ /D "" >NUL 2>&1
 	
-	CALL :XECHO Hide Mobile and Windows Insider in Options
+	CALL :XECHO Hide Mobile And Windows Insider In Options
 	REG ADD "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" /F /v "SettingsPageVisibility" /T REG_SZ /D "hide:mobile-devices;windowsinsider" >NUL 2>&1
-	
-	CALL :XECHO Remove 3D-Objects, Music, Pictures and Video Folders
-	::3D-Objects
-	REG DELETE "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{0DB7E03F-FC29-4DC6-9020-FF41B59E513A}" /F >NUL 2>&1
-	::Music
-	REG DELETE "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{1CF1260C-4DD0-4ebb-811F-33C572699FDE}" /F >NUL 2>&1
-	REG DELETE "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{3dfdf296-dbec-4fb4-81d1-6a3438bcf4de}" /F >NUL 2>&1
-	::Pictures
-	REG DELETE "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{3ADD1653-EB32-4cb0-BBD7-DFA0ABB5ACCA}" /F >NUL 2>&1
-	REG DELETE "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{24ad3ad4-a569-4530-98e1-ab02f9417aa8}" /F >NUL 2>&1
-	::Video
-	REG DELETE "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{A0953C92-50DC-43bf-BE83-3742FED03C9C}" /F >NUL 2>&1
-	REG DELETE "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{f86fa3ab-70d2-4fc7-9c99-fcbf05467f3a}" /F >NUL 2>&1
 	
 	CALL :XECHO Disable Scheduled Tasks 
 	FOR %%I IN (ProgramDataUpdater Proxy Consolidator KernelCeipTask UsbCeip Microsoft-Windows-DiskDiagnosticDataCollector
-	Microsoft-Windows-DiskDiagnosticResolver WinSAT) DO powershell "Get-ScheduledTask -TaskName %%I | Disable-ScheduledTask" >NUL 2>&1
+				Microsoft-Windows-DiskDiagnosticResolver WinSAT "Microsoft Compatibility Appraiser") DO (
+		powershell "Get-ScheduledTask -TaskName '%%I' | Disable-ScheduledTask" >NUL 2>&1 )
 	
-	CALL :XECHO Disable some Windows optional features
+	CALL :XECHO Disable Windows Optional Features
 	::BACKUP_WINDOWSOPTIONALFEATURES
 	powershell "Get-WindowsOptionalFeature -Online | Where-Object {($_.State -eq 'Enabled') -and (($_.FeatureName -NotMatch 'NetFx*') -and ($_.FeatureName -NotMatch 'MicrosoftWindowsPowerShell*'))} | Format-Table" > %~dp0/BACKUP_WINDOWSOPTIONALFEATURES_"%DATE:~6,4%.%DATE:~3,2%.%DATE:~0,2%-%TIME:~0,2%.%TIME:~3,2%-%TIME:~6,2%".txt
 	powershell "Get-WindowsOptionalFeature -Online | Where-Object {($_.State -eq 'Enabled') -and (($_.FeatureName -NotMatch 'NetFx*') -and ($_.FeatureName -NotMatch 'MicrosoftWindowsPowerShell*'))} | Disable-WindowsOptionalFeature -Online -NoRestart"
 	
-	CALL :XECHO Fixes for some shortcuts
+	CALL :XECHO Fixes For Some Shortcuts
 	FTYPE InternetShortcut="C:\Windows\System32\rundll32.exe" "C:\Windows\System32\ieframe.dll",OpenURL %l >NUL 2>&1
 	ASSOC .URL=InternetShortcut >NUL 2>&1
+	::Export Default Associations
+	dism /online /Export-DefaultAppAssociations:"%~dp0\assoc.xml" >NUL 2>&1
+	::Edit assoc.xml
+	SET assocURL="<Association Identifier=".url" ProgId="IE.AssocFile.URL" ApplicationName="Internet Browser" />"
+	FIND /C /I %assocURL% %~dp0\assoc.xml >NUL 2>&1
+	IF NOT ERRORLEVEL 1 (
+		for /f "tokens=*" %%a in (%~dp0\assoc.xml) do (
+			IF EXIST %~dp0\assoc2.xml (
+				ECHO %%a >> %~dp0\assoc2.xml
+			) ELSE (
+				ECHO %%a > %~dp0\assoc2.xml
+			)
+			IF "%%a" == "<DefaultAssociations>" (
+				ECHO ^%assocURL:~1,-3%^/^> >> "%~dp0\assoc2.xml"
+			)
+		)
+	)
+	::Import Default Associations
+	dism /online /Import-DefaultAppAssociations:"%~dp0\assoc2.xml" >NUL 2>&1
+	::Delete assoc.xml
+	DEL /F /Q "%~dp0\assoc.xml" >NUL 2>&1
+	DEL /F /Q "%~dp0\assoc2.xml" >NUL 2>&1
 	
-	CALL :XECHO OS visual fx tweaks - less animations
+	CALL :XECHO OS Visual FX Tweaks - Less Animations
 	REG ADD "HKCU\Control Panel\Desktop\WindowMetrics" /F /v VisualFXSetting /T REG_DWORD /D 3 >NUL 2>&1
 	REG ADD "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" /F /v VisualFXSetting /T REG_DWORD /D 3 >NUL 2>&1
 	REG ADD "HKCU\Control Panel\Desktop" /F /v UserPreferencesMask /T REG_BINARY /D 9012038010000000 >NUL 2>&1
@@ -277,7 +332,7 @@ IF %winversion% == 100 (
 	REG ADD "HKCU\Control Panel\Desktop\WindowMetrics" /F /v MinAnimate /T REG_SZ /D 0 >NUL 2>&1
 	REG ADD "HKCU\Software\Microsoft\Windows\DWM" /F /v EnableAeroPeek /T REG_DWORD /D 0 >NUL 2>&1
 	
-	CALL :XECHO Delete bad tweaks
+	CALL :XECHO Delete Bad Tweaks
 	REG QUERY "HKLM\SYSTEM\CurrentControlSet\Control\PriorityControl" /V "IRQ8Priority" >NUL 2>&1
 	IF NOT ERRORLEVEL 1 REG DELETE "HKLM\SYSTEM\CurrentControlSet\Control\PriorityControl" /F /V "IRQ8Priority" >NUL 2>&1
 	REG QUERY "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /V "DisablePagingExecutive" >NUL 2>&1
@@ -417,9 +472,9 @@ IF %winversion% == 100 (
 	CALL :XECHO Disable Network Data Usage Monitoring
 	REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\Ndu" /F /v Start /T REG_DWORD /D 4 >NUL 2>&1
 	CALL :XECHO Disable Teredo Tunneling Adapter and other Adapter
-	FOR %%I IN ("Microsoft Kernel Debug Network Adapter" "WAN Miniport" "Teredo Tunneling") DO powershell "Get-PnpDevice | Where-Object {$_.FriendlyName -match '%%I'} | Disable-PnpDevice -Confirm:$false"  >NUL 2>&1
+	FOR %%I IN ("Microsoft Kernel Debug Network Adapter" "WAN Miniport" "WAN-Miniport" "Teredo Tunneling") DO powershell "Get-PnpDevice | Where-Object {$_.FriendlyName -match '%%I'} | Disable-PnpDevice -Confirm:$false"  >NUL 2>&1
 	CALL :XECHO Disable some network adapter bindings
-	FOR %%I IN (ms_msclient ms_tcpip6 ms_lldp ms_lltdio ms_rspndr ms_server ms_pacer) DO powershell "Get-NetAdapter -physical | Where-Object {$_.Status -eq 'Up'} | Disable-NetAdapterBinding -ComponentID %%I"  >NUL 2>&1
+	FOR %%I IN (ms_msclient ms_lldp ms_lltdio ms_rspndr ms_server ms_pacer) DO powershell "Get-NetAdapter -physical | Where-Object {$_.Status -eq 'Up'} | Disable-NetAdapterBinding -ComponentID %%I"  >NUL 2>&1
 )
 IF NOT DEFINED AUTOTWEAK GOTO :HOME
 IF DEFINED AUTOTWEAK GOTO :RMONEDRIVE
@@ -429,99 +484,100 @@ IF DEFINED AUTOTWEAK GOTO :RMONEDRIVE
 :: POWERSETTINGS TWEAKS ::
 ::::::::::::::::::::::::::
 :POWERTWEAK
+chcp 1252 >NUL 2>&1
 CALL :XTITLE POWERCONFIG TWEAKS
 CALL :XECHO Backup Stock Settings 
 powercfg /qh > %~dp0/BACKUP_POWERCFG_"%DATE:~6,4%.%DATE:~3,2%.%DATE:~0,2%-%TIME:~0,2%.%TIME:~3,2%-%TIME:~6,2%".txt
 
 CALL :XECHO Activate High Performance Scheme
-powercfg -setactive scheme_min
+powercfg -setactive scheme_min >NUL 2>&1
 
-CALL :XECHO Processor performance increase threshold / Schwellenwert zum Erh”hen der Prozessorleistung
+CALL :XECHO Processor performance increase threshold / Schwellenwert zum Erh"hen der Prozessorleistung
 ECHO Optimized Value: 0%
-powercfg -attributes SUB_PROCESSOR 06cadf0e-64ed-448a-8927-ce7bf90eb35d -ATTRIB_HIDE
-powercfg -setacvalueindex scheme_current sub_processor 06cadf0e-64ed-448a-8927-ce7bf90eb35d 0
+powercfg -attributes SUB_PROCESSOR 06cadf0e-64ed-448a-8927-ce7bf90eb35d -ATTRIB_HIDE >NUL 2>&1
+powercfg -setacvalueindex scheme_current sub_processor 06cadf0e-64ed-448a-8927-ce7bf90eb35d 0 >NUL 2>&1
 
 
 CALL :XECHO Processor performance decrease threshold / Schwellenwert zum Reduzieren der Prozessorleistung
 ECHO Optimized Value: 100%
-powercfg -attributes SUB_PROCESSOR 12a0ab44-fe28-4fa9-b3bd-4b64f44960a6 -ATTRIB_HIDE
-powercfg -setacvalueindex scheme_current sub_processor 12a0ab44-fe28-4fa9-b3bd-4b64f44960a6 100
+powercfg -attributes SUB_PROCESSOR 12a0ab44-fe28-4fa9-b3bd-4b64f44960a6 -ATTRIB_HIDE >NUL 2>&1
+powercfg -setacvalueindex scheme_current sub_processor 12a0ab44-fe28-4fa9-b3bd-4b64f44960a6 100 >NUL 2>&1
 
 
 CALL :XECHO Processor performance decrease policy / Prozessorleistung - Reduzierungsrichtlinie
 ECHO Optimized Value: Rocket
-powercfg -attributes SUB_PROCESSOR 40fbefc7-2e9d-4d25-a185-0cfd8574bac6 -ATTRIB_HIDE
-powercfg -setacvalueindex scheme_current sub_processor 40fbefc7-2e9d-4d25-a185-0cfd8574bac6 2
-powercfg -setactive scheme_current
+powercfg -attributes SUB_PROCESSOR 40fbefc7-2e9d-4d25-a185-0cfd8574bac6 -ATTRIB_HIDE >NUL 2>&1
+powercfg -setacvalueindex scheme_current sub_processor 40fbefc7-2e9d-4d25-a185-0cfd8574bac6 2 >NUL 2>&1
 
-CALL :XECHO Processor performance increase policy / Prozessorleistung - Erh”hungsrichtlinie
+CALL :XECHO Processor performance increase policy / Prozessorleistung - Erh"hungsrichtlinie
 ECHO Optimized Value: Ideal
-powercfg -attributes SUB_PROCESSOR 465e1f50-b610-473a-ab58-00d1077dc418 -ATTRIB_HIDE
-powercfg -setacvalueindex scheme_current sub_processor 465e1f50-b610-473a-ab58-00d1077dc418 0
+powercfg -attributes SUB_PROCESSOR 465e1f50-b610-473a-ab58-00d1077dc418 -ATTRIB_HIDE >NUL 2>&1
+powercfg -setacvalueindex scheme_current sub_processor 465e1f50-b610-473a-ab58-00d1077dc418 0 >NUL 2>&1
 
-CALL :XECHO Processor idle demote threshold / Prozessorleerlauf - Schwellenwert fr Herabstufung
+CALL :XECHO Processor idle demote threshold / Prozessorleerlauf - Schwellenwert f?r Herabstufung
 ECHO Optimized Value: 0%
-powercfg -attributes SUB_PROCESSOR 4b92d758-5a24-4851-a470-815d78aee119 -ATTRIB_HIDE
-powercfg -setacvalueindex scheme_current sub_processor 4b92d758-5a24-4851-a470-815d78aee119 0
+powercfg -attributes SUB_PROCESSOR 4b92d758-5a24-4851-a470-815d78aee119 -ATTRIB_HIDE >NUL 2>&1
+powercfg -setacvalueindex scheme_current sub_processor 4b92d758-5a24-4851-a470-815d78aee119 0 >NUL 2>&1
 
 
-CALL :XECHO Processor idle promote threshold / Prozessorleerlauf - Schwellenwert fr Heraufstufung
+CALL :XECHO Processor idle promote threshold / Prozessorleerlauf - Schwellenwert f?r Heraufstufung
 ECHO Optimized Value: 0%
-powercfg -attributes SUB_PROCESSOR 7b224883-b3cc-4d79-819f-8374152cbe7c -ATTRIB_HIDE
-powercfg -setacvalueindex scheme_current sub_processor 7b224883-b3cc-4d79-819f-8374152cbe7c 0
+powercfg -attributes SUB_PROCESSOR 7b224883-b3cc-4d79-819f-8374152cbe7c -ATTRIB_HIDE >NUL 2>&1
+powercfg -setacvalueindex scheme_current sub_processor 7b224883-b3cc-4d79-819f-8374152cbe7c 0 >NUL 2>&1
 
 
-CALL :XECHO Processor performance core parking over utilization threshold / Prozessorleistung: Parken von Kernen - Schwellenwert fr berm„áige Kernnutzung
+CALL :XECHO Processor performance core parking over utilization threshold / Prozessorleistung: Parken von Kernen - Schwellenwert f?r ?bem,áige Kernnutzung
 ECHO Optimized Value: 100%
-powercfg -attributes SUB_PROCESSOR 943c8cb6-6f93-4227-ad87-e9a3feec08d1 -ATTRIB_HIDE
-powercfg -setacvalueindex scheme_current sub_processor 943c8cb6-6f93-4227-ad87-e9a3feec08d1 100
+powercfg -attributes SUB_PROCESSOR 943c8cb6-6f93-4227-ad87-e9a3feec08d1 -ATTRIB_HIDE >NUL 2>&1
+powercfg -setacvalueindex scheme_current sub_processor 943c8cb6-6f93-4227-ad87-e9a3feec08d1 100 >NUL 2>&1
 
-CALL :XECHO Processor performance boost mode / Leistungssteigerungsmodus fr Prozessoren
+CALL :XECHO Processor performance boost mode / Leistungssteigerungsmodus f?r Prozessoren
 ECHO Optimized Value: Enabled
-powercfg -attributes SUB_PROCESSOR be337238-0d82-4146-a960-4f3749d470c7 -ATTRIB_HIDE
-powercfg -setacvalueindex scheme_current sub_processor be337238-0d82-4146-a960-4f3749d470c7 1
+powercfg -attributes SUB_PROCESSOR be337238-0d82-4146-a960-4f3749d470c7 -ATTRIB_HIDE >NUL 2>&1
+powercfg -setacvalueindex scheme_current sub_processor be337238-0d82-4146-a960-4f3749d470c7 1 >NUL 2>&1
 
 CALL :XECHO Processor idle disable / Prozessorleerlauf deaktivieren
 ECHO Optimized Value: idle disabled
-powercfg -attributes SUB_PROCESSOR 5d76a2ca-e8c0-402f-a133-2158492d58ad -ATTRIB_HIDE
-powercfg -setacvalueindex scheme_current sub_processor 5d76a2ca-e8c0-402f-a133-2158492d58ad 1
+powercfg -attributes SUB_PROCESSOR 5d76a2ca-e8c0-402f-a133-2158492d58ad -ATTRIB_HIDE >NUL 2>&1
+powercfg -setacvalueindex scheme_current sub_processor 5d76a2ca-e8c0-402f-a133-2158492d58ad 1 >NUL 2>&1
 
-CALL :XECHO Allow Throttle States / Drosselungszust„nde zulassen
+CALL :XECHO Allow Throttle States / Drosselungszust,nde zulassen
 ECHO Optimized Value: Disabled
-powercfg -attributes SUB_PROCESSOR 3b04d4fd-1cc7-4f23-ab1c-d1337819c4bb -ATTRIB_HIDE
-powercfg -setacvalueindex scheme_current sub_processor 3b04d4fd-1cc7-4f23-ab1c-d1337819c4bb 0
+powercfg -attributes SUB_PROCESSOR 3b04d4fd-1cc7-4f23-ab1c-d1337819c4bb -ATTRIB_HIDE >NUL 2>&1
+powercfg -setacvalueindex scheme_current sub_processor 3b04d4fd-1cc7-4f23-ab1c-d1337819c4bb 0 >NUL 2>&1
 
-CALL :XECHO Upper bound for processor performance throttling / Maximum processor state / Drosselungszust„nde zulassen
+CALL :XECHO Upper bound for processor performance throttling / Maximum processor state / Drosselungszust,nde zulassen
 ECHO Optimized Value: 100%
-powercfg -attributes SUB_PROCESSOR bc5038f7-23e0-4960-96da-33abaf5935ec -ATTRIB_HIDE
-powercfg -setacvalueindex scheme_current sub_processor bc5038f7-23e0-4960-96da-33abaf5935ec 100
+powercfg -attributes SUB_PROCESSOR bc5038f7-23e0-4960-96da-33abaf5935ec -ATTRIB_HIDE >NUL 2>&1
+powercfg -setacvalueindex scheme_current sub_processor bc5038f7-23e0-4960-96da-33abaf5935ec 100 >NUL 2>&1
 
-CALL :XECHO Lower bound for processor performance throttling / Minimum processor state / Drosselungszust„nde zulassen
+CALL :XECHO Lower bound for processor performance throttling / Minimum processor state / Drosselungszust,nde zulassen
 ECHO Optimized Value: 100%
-powercfg -attributes SUB_PROCESSOR 893dee8e-2bef-41e0-89c6-b55d0929964c -ATTRIB_HIDE
-powercfg -setacvalueindex scheme_current sub_processor 893dee8e-2bef-41e0-89c6-b55d0929964c 100
+powercfg -attributes SUB_PROCESSOR 893dee8e-2bef-41e0-89c6-b55d0929964c -ATTRIB_HIDE >NUL 2>&1
+powercfg -setacvalueindex scheme_current sub_processor 893dee8e-2bef-41e0-89c6-b55d0929964c 100 >NUL 2>&1
 
 CALL :XECHO Core-Parking
 ECHO Processor performance core parking min cores
-powercfg -attributes SUB_PROCESSOR 0cc5b647-c1df-4637-891a-dec35c318583 -ATTRIB_HIDE
-powercfg -setacvalueindex scheme_current sub_processor 0cc5b647-c1df-4637-891a-dec35c318583 100
+powercfg -attributes SUB_PROCESSOR 0cc5b647-c1df-4637-891a-dec35c318583 -ATTRIB_HIDE >NUL 2>&1
+powercfg -setacvalueindex scheme_current sub_processor 0cc5b647-c1df-4637-891a-dec35c318583 100 >NUL 2>&1
 
 ECHO Core-Parking for Skylake
-ECHO Processor performance autonomous mode / Autonomer Modus fr die Prozessorleistung
-powercfg -attributes SUB_PROCESSOR 8baa4a8a-14c6-4451-8e8b-14bdbd197537 -ATTRIB_HIDE
-powercfg -setacvalueindex scheme_current sub_processor 8baa4a8a-14c6-4451-8e8b-14bdbd197537 1
-ECHO Processor energy performance preference policy / Richtlinie fr die bevorzugte Prozessorenergieeffizienz
-powercfg -attributes SUB_PROCESSOR 36687f9e-e3a5-4dbf-b1dc-15eb381c6863 -ATTRIB_HIDE
-powercfg -setacvalueindex scheme_current sub_processor 36687f9e-e3a5-4dbf-b1dc-15eb381c6863 0
+ECHO Processor performance autonomous mode / Autonomer Modus f?r die Prozessorleistung
+powercfg -attributes SUB_PROCESSOR 8baa4a8a-14c6-4451-8e8b-14bdbd197537 -ATTRIB_HIDE >NUL 2>&1
+powercfg -setacvalueindex scheme_current sub_processor 8baa4a8a-14c6-4451-8e8b-14bdbd197537 1 >NUL 2>&1
+ECHO Processor energy performance preference policy / Richtlinie f?r die bevorzugte Prozessorenergieeffizienz
+powercfg -attributes SUB_PROCESSOR 36687f9e-e3a5-4dbf-b1dc-15eb381c6863 -ATTRIB_HIDE >NUL 2>&1
+powercfg -setacvalueindex scheme_current sub_processor 36687f9e-e3a5-4dbf-b1dc-15eb381c6863 0 >NUL 2>&1
 ECHO Processor duty cycling / Prozessor-Aussetzbetrieb
-powercfg -attributes SUB_PROCESSOR 4e4450b3-6179-4e91-b8f1-5bb9938f81a1 -ATTRIB_HIDE
-powercfg -setacvalueindex scheme_current sub_processor 4e4450b3-6179-4e91-b8f1-5bb9938f81a1 0
-ECHO Processor autonomous activity window / Fenster fr die autonome Prozessoraktivit„t
-powercfg -attributes SUB_PROCESSOR cfeda3d0-7697-4566-a922-a9086cd49dfa -ATTRIB_HIDE
-powercfg -setacvalueindex scheme_current sub_processor cfeda3d0-7697-4566-a922-a9086cd49dfa 30000
+powercfg -attributes SUB_PROCESSOR 4e4450b3-6179-4e91-b8f1-5bb9938f81a1 -ATTRIB_HIDE >NUL 2>&1
+powercfg -setacvalueindex scheme_current sub_processor 4e4450b3-6179-4e91-b8f1-5bb9938f81a1 0 >NUL 2>&1
+ECHO Processor autonomous activity window / Fenster fü?r die autonome Prozessoraktivit,t
+powercfg -attributes SUB_PROCESSOR cfeda3d0-7697-4566-a922-a9086cd49dfa -ATTRIB_HIDE >NUL 2>&1
+powercfg -setacvalueindex scheme_current sub_processor cfeda3d0-7697-4566-a922-a9086cd49dfa 30000 >NUL 2>&1
 
 CALL :XECHO Save new settings
-powercfg -setactive scheme_current
+powercfg -setactive scheme_current >NUL 2>&1
+chcp 850 >NUL 2>&1
 IF NOT DEFINED AUTOTWEAK GOTO :HOME
 IF DEFINED AUTOTWEAK GOTO :NETTWEAK
 
@@ -546,7 +602,7 @@ IF ERRORLEVEL 2 (
 	FOR %%I IN (gfwsl.geforce.com gfe.geforce.com telemetry.nvidia.com
 	gfe.nvidia.com telemetry.gfe.nvidia.com events.gfe.nvidia.com) DO ( 
 		FIND /C /I "%%I" %WINDIR%\system32\drivers\etc\hosts >NUL 2>&1
-		IF !ERRORLEVEL! NEQ 0 (
+		IF ERRORLEVEL 1 (
 			CALL :XECHOF Add %%I to hosts
 			ECHO ^0.0.0.0 %%I>>%WINDIR%\system32\drivers\etc\hosts
 		)
@@ -555,7 +611,7 @@ IF ERRORLEVEL 2 (
 IF ERRORLEVEL 1 (
 	FOR %%I IN (gfe.geforce.com telemetry.nvidia.com telemetry.gfe.nvidia.com events.gfe.nvidia.com) DO ( 
 		FIND /C /I "%%I" %WINDIR%\system32\drivers\etc\hosts >NUL 2>&1
-		IF !ERRORLEVEL! NEQ 0 (
+		IF ERRORLEVEL 1 (
 			CALL :XECHOF Add %%I to hosts
 			ECHO ^0.0.0.0 %%I>>%WINDIR%\system32\drivers\etc\hosts
 		)
@@ -564,12 +620,12 @@ IF ERRORLEVEL 1 (
 GOTO :HOME
 
 :UNINSTALLRZSTATS
-CALL :XTITLE REMOVE RAZER STATS FROM SYNAPSE
+CALL :XTITLE REMOVE RAZER STATS AND CHROMA SDK
 IF EXIST %PROGRAMDATA%\Razer\Synapse\ProductUpdates\Uninstallers\RzStats (
-	%PROGRAMDATA%\Razer\Synapse\ProductUpdates\Uninstallers\RzStats\Razer_RzStats_Uninstall.exe /S > NUL 2>&1
+	START /WAIT %PROGRAMDATA%\Razer\Synapse\ProductUpdates\Uninstallers\RzStats\Razer_RzStats_Uninstall.exe /S > NUL 2>&1
 )
-IF EXIST %ProgramFiles(x86)%\Razer Chroma SDK (
-	%ProgramFiles(x86)%\Razer Chroma SDK\Razer_Chroma_SDK_Uninstaller.exe /S > NUL 2>&1
+IF EXIST "%ProgramFiles(x86)%\Razer Chroma SDK" (
+	START /WAIT "%ProgramFiles(x86)%\Razer Chroma SDK\Razer_Chroma_SDK_Uninstaller.exe" /S > NUL 2>&1
 )
 
 GOTO :HOME
@@ -583,16 +639,13 @@ FOR %%I IN (3DBuilder Appconnector BingFinance BingNews BingSports BingWeather G
 			ZuneVideo windowscommunicationsapps MinecraftUWP MicrosoftPowerBIForWindows NetworkSpeedTest
 			CommsPhone ConnectivityStore Messaging Office.Sway OneConnect WindowsFeedbackHub 
 			BingFoodAndDrink BingTravel BingHealthAndFitness WindowsReadingList Microsoft3DViewer
-			9E2F88E3.Twitter PandoraMediaInc.29680B314EFC2 Flipboard.Flipboard ShazamEntertainmentLtd.Shazam
-			king.com.CandyCrushSaga king.com.CandyCrushSodaSaga king.com. ClearChannelRadioDigital.iHeartRadio
-			4DF9E0F8.Netflix 6Wunderkinder.Wunderlist Drawboard.DrawboardPDF 2FE3CB00.PicsArt-PhotoStudio
-			D52A8D61.FarmVille2CountryEscape TuneIn.TuneInRadio GAMELOFTSA.Asphalt8Airborne Xbox.TCUI
-			DB6EA5DB.CyberLinkMediaSuiteEssentials Facebook.Facebook flaregamesGmbH.RoyalRevolt2
-			Playtika.CaesarsSlotsFreeCasino A278AB0D.MarchofEmpires KeeperSecurityInc.Keeper Print3D
-			ThumbmunkeysLtd.PhototasticCollage XINGAG.XING 89006A2E.AutodeskSketchBook HEVCVideoExtension
-			D5EA27B7.Duolingo-LearnLanguagesforFree 46928bounde.EclipseManager ActiproSoftwareLLC.562882FEEB491
-			BioEnrollment WindowsFeedback XboxGameOverlay XboxGameCallableUI XboxIdentityProvider ContactSupport
-			XboxSpeechToTextOverlay MiracastView Print3D GetHelp HolographicFirstRun) DO (
+			Twitter PandoraMediaInc.29680B314EFC2 Flipboard Shazam CandyCrushSaga CandyCrushSodaSaga
+			iHeartRadio Netflix Wunderlist DrawboardPDF PicsArt-PhotoStudio	FarmVille2CountryEscape
+			TuneInRadio Asphalt8Airborne Xbox.TCUI CyberLinkMediaSuiteEssentials Facebook RoyalRevolt2
+			CaesarsSlotsFreeCasino MarchofEmpires Keeper Print3D PhototasticCollage XING AutodeskSketchBook
+			HEVCVideoExtension Duolingo-LearnLanguagesforFree EclipseManager ActiproSoftwareLLC.562882FEEB491
+			BioEnrollment WindowsFeedback XboxGameOverlay XboxGameCallableUI XboxIdentityProvider 
+			ContactSupport XboxSpeechToTextOverlay MiracastView Print3D GetHelp HolographicFirstRun) DO (
 	powershell "Get-AppxPackage *%%I* -AllUsers | Remove-AppxPackage -AllUsers" >NUL 2>&1
 	powershell "Get-AppxProvisionedPackage -Online | Where-Object {$_.DisplayName -like '*%%I*'} | Remove-AppxProvisionedPackage -Online" >NUL 2>&1
 )
@@ -611,11 +664,10 @@ SET x64="%SYSTEMROOT%\SysWOW64\OneDriveSetup.exe"
 taskkill /f /im OneDrive.exe > NUL 2>&1
 ping 127.0.0.1 -n 5 > NUL 2>&1 
 IF EXIST %x64% (
-%x64% /uninstall
+	START /WAIT %x64% /uninstall
 ) ELSE (
-%x86% /uninstall
+	START /WAIT %x86% /uninstall
 )
-ping 127.0.0.1 -n 8 > NUL 2>&1 
 rd "%USERPROFILE%\OneDrive" /Q /S > NUL 2>&1
 rd "C:\OneDriveTemp" /Q /S > NUL 2>&1
 rd "%LOCALAPPDATA%\Microsoft\OneDrive" /Q /S > NUL 2>&1
@@ -624,6 +676,7 @@ ECHO.
 ECHO Removeing OneDrive from the Explorer Side Panel.
 REG DELETE "HKEY_CLASSES_ROOT\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" /f > NUL 2>&1
 REG DELETE "HKEY_CLASSES_ROOT\Wow6432Node\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" /f > NUL 2>&1
+REG DELETE "HKCU\Software\Microsoft\Windows\CurrentVersion\Run" /f /v OneDriveSetup > NUL 2>&1
 IF NOT DEFINED AUTOTWEAK GOTO :HOME
 IF DEFINED AUTOTWEAK GOTO :RMTELEMETRY
 GOTO :HOME
@@ -634,54 +687,60 @@ GOTO :HOME
 :::::::::::::::::::::::::::::::::
 :RMTELEMETRY
 CALL :XTITLE EDITING HOSTS FILE
-FOR %%I IN (a-0001.a-msedge.net a-0002.a-msedge.net a-0003.a-msedge.net a-0004.a-msedge.net
-a-0005.a-msedge.net a-0006.a-msedge.net a-0007.a-msedge.net a-0008.a-msedge.net
-a-0009.a-msedge.net a-msedge.net a.ads1.msn.com a.ads2.msads.net a.ads2.msn.com
-a.rad.msn.com ac3.msn.com ad.doubleclick.net adnexus.net adnxs.com ads.msn.com
-ads1.msads.net ads1.msn.com aidps.atdmt.com aka-cdn-ns.adtech.de
-az361816.vo.msecnd.net az512334.vo.msecnd.net b.ads1.msn.com b.ads2.msads.net
-b.rad.msn.com bs.serving-sys.com c.atdmt.com c.msn.com cdn.atdmt.com
-cds26.ams9.msecn.net choice.microsoft.com choice.microsoft.com.nsatc.net
-compatexchange.cloudapp.net corp.sts.microsoft.com corpext.msitadfs.glbdns2.microsoft.com
-cs1.wpc.v0cdn.net db3aqu.atdmt.com df.telemetry.microsoft.com
-diagnostics.support.microsoft.com ec.atdmt.com feedback.microsoft-hohm.com
-feedback.search.microsoft.com feedback.windows.com flex.msn.com g.msn.com h1.msn.com
-i1.services.social.microsoft.com i1.services.social.microsoft.com.nsatc.net
-lb1.www.ms.akadns.net live.rads.msn.com m.adnxs.com msedge.net msftncsi.com
-msnbot-65-55-108-23.search.msn.com msntest.serving-sys.com oca.telemetry.microsoft.com
-oca.telemetry.microsoft.com.nsatc.net pre.footprintpredict.com preview.msn.com
-rad.live.com rad.msn.com redir.metaservices.microsoft.com
-reports.wes.df.telemetry.microsoft.com schemas.microsoft.akadns.net
-secure.adnxs.com secure.flashtalking.com services.wes.df.telemetry.microsoft.com
-settings-sandbox.data.microsoft.com settings-win.data.microsoft.com
-sls.update.microsoft.com.akadns.net sqm.df.telemetry.microsoft.com
-sqm.telemetry.microsoft.com sqm.telemetry.microsoft.com.nsatc.net ssw.live.com
-static.2mdn.net statsfe1.ws.microsoft.com statsfe2.ws.microsoft.com
-telecommand.telemetry.microsoft.com telecommand.telemetry.microsoft.com.nsatc.net
-telemetry.appex.bing.net telemetry.microsoft.com telemetry.urs.microsoft.com
-v10.vortex-win.data.microsoft.com vortex-bn2.metron.live.com.nsatc.net
-vortex-cy2.metron.live.com.nsatc.net vortex-sandbox.data.microsoft.com
-vortex-win.data.metron.live.com.nsatc.net vortex-win.data.microsoft.com
-vortex.data.glbdns2.microsoft.com vortex.data.microsoft.com watson.live.com
-web.vortex.data.microsoft.com www.msftncsi.com
-fe2.update.microsoft.com.akadns.net s0.2mdn.net statsfe2.update.microsoft.com.akadns.net
-survey.watson.microsoft.com view.atdmt.com watson.microsoft.com
-watson.ppe.telemetry.microsoft.com watson.telemetry.microsoft.com
-watson.telemetry.microsoft.com.nsatc.net wes.df.telemetry.microsoft.com ui.skype.com
-pricelist.skype.com apps.skype.com m.hotmail.com s.gateway.messenger.live.com
-2.22.61.43 2.22.61.66 65.39.117.230 65.55.108.23 23.218.212.69 134.170.30.202
-137.116.81.24 157.56.106.189 204.79.197.200 65.52.108.33 64.4.54.254) DO ( 
+FOR %%I IN (choice.microsoft.com choice.microsoft.com.nstac.net df.telemetry.microsoft.com
+			oca.telemetry.microsoft.com oca.telemetry.microsoft.com.nsatc.net
+			redir.metaservices.microsoft.com reports.wes.df.telemetry.microsoft.com
+			services.wes.df.telemetry.microsoft.com settings-sandbox.data.microsoft.com
+			settings-win.data.microsoft.com sqm.df.telemetry.microsoft.com
+			sqm.telemetry.microsoft.com sqm.telemetry.microsoft.com.nsatc.net
+			telecommand.telemetry.microsoft.com telecommand.telemetry.microsoft.com.nsatc.net
+			telemetry.appex.bing.net telemetry.microsoft.com telemetry.urs.microsoft.com
+			vortex-sandbox.data.microsoft.com vortex-win.data.microsoft.com
+			vortex.data.microsoft.com watson.telemetry.microsoft.com spynetalt.microsoft.com
+			watson.telemetry.microsoft.com.nsatc.net watson.ppe.telemetry.microsoft.com
+			wes.df.telemetry.microsoft.com vortex-bn2.metron.live.com.nsatc.net
+			vortex-cy2.metron.live.com.nsatc.net watson.live.com watson.microsoft.com
+			feedback.search.microsoft.com feedback.windows.com corp.sts.microsoft.com
+			diagnostics.support.microsoft.com i1.services.social.microsoft.com 
+			i1.services.social.microsoft.com.nsatc.net vortex-bn2.metron.live.com.nsatc.net
+			vortex-cy2.metron.live.com.nsatc.net ca.telemetry.microsoft.com
+			cache.datamart.windows.com diagnostics.support.microsoft.com spynet2.microsoft.com) DO ( 
 	FIND /C /I "%%I" %WINDIR%\system32\drivers\etc\hosts > NUL 2>&1
-	IF !ERRORLEVEL! NEQ 0 (
+	IF ERRORLEVEL 1 (
 		CALL :XECHOF Add %%I to hosts
 		ECHO ^0.0.0.0 %%I>>%WINDIR%\system32\drivers\etc\hosts
 	)
 )
-REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\dmwappushsvc" /F /v Start /T REG_DWORD /D 4 >NUL 2>&1
+::Stop Telemetry Services
+REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\dmwappushservice" /F /v Start /T REG_DWORD /D 4 >NUL 2>&1
 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\DiagTrack" /F /v Start /T REG_DWORD /D 4 >NUL 2>&1
-REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection\AllowTelemetry" /F /v Start /T REG_DWORD /D 0 >NUL 2>&1
-REG ADD "HKLM\SOFTWARE\Microsoft\WcmSvc\wifinetworkmanager\features\WiFiSenseCredShared" /F /v Start /T REG_DWORD /D 0 >NUL 2>&1
-REG ADD "HKLM\SOFTWARE\Microsoft\WcmSvc\wifinetworkmanager\features\WiFiSenseOpen" /F /v Start /T REG_DWORD /D 0 >NUL 2>&1
+
+wmic useraccount where name='%username%' get sid /format:list|findstr /C:"SID=" > %~dp0\tmp.tmp
+FOR /f "usebackq" %%v in (%~dp0\tmp.tmp) DO SET uSID=%%v
+DEL "%~dp0\tmp.tmp" /f /s /q >NUL 2>&1
+SET uSID = %uSID:~4%
+REG ADD "HKLM\SOFTWARE\Microsoft\WcmSvc\wifinetworkmanager\features\!uSID!" /F /v FeatureStates /T REG_DWORD /D 33C >NUL 2>&1
+REG ADD "HKLM\SOFTWARE\Microsoft\WcmSvc\wifinetworkmanager\features" /F /v WiFiSenseCredShared /T REG_DWORD /D 0 >NUL 2>&1
+REG ADD "HKLM\SOFTWARE\Microsoft\WcmSvc\wifinetworkmanager\features" /F /v WiFiSenseOpen /T REG_DWORD /D 0 >NUL 2>&1
+REG ADD "HKLM\SOFTWARE\Policies\Microsoft\SQMClient\Windows" /F /v CEIPEnable /T REG_DWORD /D 0 >NUL 2>&1
+REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /F /v AllowTelemetry /T REG_DWORD /D 0 >NUL 2>&1
+REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows\Personalization" /F /v NoLockScreenCamera /T REG_DWORD /D 1 >NUL 2>&1
+REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows\AppCompat" /F /v DisableUAR /T REG_DWORD /D 1 >NUL 2>&1
+REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows\AppCompat" /F /v AITEnable /T REG_DWORD /D 0 >NUL 2>&1
+REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors" /F /v DisableSensors /T REG_DWORD /D 1 >NUL 2>&1
+REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows\TabletPC" /F /v PreventHandwritingDataSharing /T REG_DWORD /D 1 >NUL 2>&1
+IF EXIST %ProgramFiles(x86)% (
+	REG ADD "HKLM\SOFTWARE\WOW6432Node\Microsoft\WcmSvc\wifinetworkmanager\features\!uSID!" /F /v FeatureStates /T REG_DWORD /D 33C >NUL 2>&1
+	REG ADD "HKLM\SOFTWARE\WOW6432Node\Microsoft\WcmSvc\wifinetworkmanager\features" /F /v WiFiSenseCredShared /T REG_DWORD /D 0 >NUL 2>&1
+	REG ADD "HKLM\SOFTWARE\WOW6432Node\Microsoft\WcmSvc\wifinetworkmanager\features" /F /v WiFiSenseOpen /T REG_DWORD /D 0 >NUL 2>&1
+	REG ADD "HKLM\SOFTWARE\WOW6432Node\Policies\Microsoft\SQMClient\Windows" /F /v CEIPEnable /T REG_DWORD /D 0 >NUL 2>&1
+	REG ADD "HKLM\SOFTWARE\WOW6432Node\Policies\Microsoft\Windows\DataCollection" /F /v AllowTelemetry /T REG_DWORD /D 0 >NUL 2>&1
+	REG ADD "HKLM\SOFTWARE\WOW6432Node\Policies\Microsoft\Windows\Personalization" /F /v NoLockScreenCamera /T REG_DWORD /D 1 >NUL 2>&1
+	REG ADD "HKLM\SOFTWARE\WOW6432Node\Policies\Microsoft\Windows\AppCompat" /F /v DisableUAR /T REG_DWORD /D 1 >NUL 2>&1
+	REG ADD "HKLM\SOFTWARE\WOW6432Node\Policies\Microsoft\Windows\AppCompat" /F /v AITEnable /T REG_DWORD /D 0 >NUL 2>&1
+	REG ADD "HKLM\SOFTWARE\WOW6432Node\Policies\Microsoft\Windows\LocationAndSensors" /F /v DisableSensors /T REG_DWORD /D 1 >NUL 2>&1
+	REG ADD "HKLM\SOFTWARE\WOW6432Node\Policies\Microsoft\Windows\TabletPC" /F /v PreventHandwritingDataSharing /T REG_DWORD /D 1 >NUL 2>&1
+)
 IF NOT DEFINED AUTOTWEAK GOTO :HOME
 IF DEFINED AUTOTWEAK GOTO :AUTOTWEAKS
 
@@ -698,14 +757,24 @@ CALL :XDONE
 GOTO :eof
 
 :CLEANER
-powershell -ExecutionPolicy Bypass "& '%~dp0\resources\WindowsCleanup.ps1'"
+CALL :XTITLE WINDOWS CLEANER
+CALL :XECHO Clean Windows with cleanmgr
+powershell -ExecutionPolicy Bypass "& '%~dp0\resources\WindowsCleanup.ps1'" >NUL 2>&1
+IF EXIST %LOCALAPPDATA%\Mozilla\Firefox\Profiles (
+	CALL :XECHO Clear Firefox cache
+	DEL "%LOCALAPPDATA%\Mozilla\Firefox\Profiles\*.*" /f /s /q >NUL 2>&1
+	FOR /D %%i IN ("%LOCALAPPDATA%\Mozilla\Firefox\Profiles\*") DO RD /S /Q "%%i" >NUL 2>&1
+)
 GOTO :HOME
 
 :UNUSEDDRIVER
+CALL :XTITLE REMOVE UNUSED DRIVERS
 IF EXIST %ProgramFiles(x86)% (
-	CALL %~dp0\resources\x64\DeviceCleanupCmd.exe * -m:14d
+	CALL %~dp0\resources\x64\DeviceCleanupCmd.exe * -s
+	MODE con lines=40 cols=59
 ) ELSE (
-	CALL %~dp0\resources\x86\DeviceCleanupCmd.exe * -m:14d
+	CALL %~dp0\resources\x86\DeviceCleanupCmd.exe * -s
+	MODE con lines=40 cols=59
 )
 GOTO :HOME
 
@@ -782,7 +851,7 @@ IF %winversion% == 100 (
 		IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 3 >NUL 2>&1)
 	::Disabled
 	FOR %%I IN (AJRouter ALG AppMgmt tzautoupdate BthHFSrv bthserv PeerDistSvc CertPropSvc NfsClnt 
-	dmwappushsvc MapsBroker lfsvc HvHost vmickvpexchange vmicguestinterface vmicshutdown vmicheartbeat 
+	MapsBroker lfsvc HvHost vmickvpexchange vmicguestinterface vmicshutdown vmicheartbeat 
 	vmicvmsession vmicrdv vmictimesync vmicvss irmon SharedAccess iphlpsvc IpxlatCfgSvc AppVClient 
 	MSiSCSI SmsRouter NaturalAuthentication Netlogon NcdAutoSetup CscService SEMgrSvc PhoneSvc 
 	SessionEnv TermService UmRdpService RpcLocator RemoteRegistry RetailDemo RemoteAccess SensorDataService 
@@ -790,7 +859,7 @@ IF %winversion% == 100 (
 	UevAgentService WebClient WFDSConSvc FrameServer wcncsvc wisvc WMPNetworkSvc icssvc WinRM WwanSvc 
 	xbgm XblAuthManager XblGameSave XboxNetApiSvc diagnosticshub.standardcollector.service DiagTrack 
 	DoSvc DPS WdiServiceHost HomeGroupListener HomeGroupProvider NetTcpPortSharing TrkWks WbioSrvc 
-	wscsvc NcbService Spooler LanmanServer) DO (
+	wscsvc NcbService Spooler LanmanServer dmwappushservice) DO (
 		REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >NUL 2>&1
 		IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 4 >NUL 2>&1)
 )
@@ -842,7 +911,7 @@ IF %winversion% == 100 (
 		FOR %%I IN (AxInstSV AJRouter AppReadiness AppIDSvc Appinfo ALG AppXSVC BITS BDESVC wbengine BthHFSrv 
 		bthserv camsvc CertPropSvc ClipSVC KeyIso COMSysApp Browser PimIndexMaintenanceSvc_%service% VaultSvc DsSvc 
 		DeviceAssociationService DeviceInstall DmEnrollmentSvc DsmSVC DevicesFlowUserSvc_%service% DevQueryBroker 
-		diagsvc WdiServiceHost WdiSystemHost MSDTC dmwappushsvc embeddedmode EFS EntAppSvc EapHost Fax fhsvc 
+		diagsvc WdiServiceHost WdiSystemHost MSDTC embeddedmode EFS EntAppSvc EapHost Fax fhsvc 
 		fdPHost FDResPub lfsvc GraphicsPerfSvc HomeGroupListener HomeGroupProvider hidserv HvHost vmickvpexchange 
 		vmicguestinterface vmicshutdown vmicheartbeat vmicvmsession vmicrdv vmictimesync vmicvss IKEEXT irmon 
 		UI0Detect SharedAccess IpxlatCfgSvc PolicyAgent KtmRm lltdsvc wlpasvc MessagingService_%service% 
@@ -856,7 +925,7 @@ IF %winversion% == 100 (
 		vds VSS WalletService  TokenBroker WebClient WFDSConSvc SDRSVC WbioSrvc FrameServer wcncsvc WdNisSvc 
 		WEPHOSTSVC WerSvc Wecsvc StiSvc wisvc msiserver LicenseManager WMPNetworkSvc icssvc TrustedInstaller 
 		spectrum WpnUserService_%service% WinRM InstallService W32Time wuauserv WinHttpAutoProxySvc dot3svc wmiApSrv 
-		workfolderssvc WwanSvc XboxGipSvc xbgm XblAuthManager XblGameSave XboxNetApiSvc) DO (
+		workfolderssvc WwanSvc XboxGipSvc xbgm XblAuthManager XblGameSave XboxNetApiSvc dmwappushservice) DO (
 			REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >NUL 2>&1
 			IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 3 >NUL 2>&1)
 		::Disabled
@@ -876,9 +945,9 @@ IF %winversion% == 100 (
 			IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 2 >NUL 2>&1)
 		::Manual
 		FOR %%I IN (AxInstSV AJRouter AppReadiness AppIDSvc Appinfo ALG AppMgmt AppXSVC BITS BDESVC wbengine 
-		BthHFSrv bthserv PeerDistSvc camsvc CertPropSvc ClipSVC KeyIso COMSysApp Browser 
+		BthHFSrv bthserv PeerDistSvc camsvc CertPropSvc ClipSVC KeyIso COMSysApp Browser dmwappushservice
 		PimIndexMaintenanceSvc_%service% VaultSvc DsSvc DeviceAssociationService DeviceInstall DmEnrollmentSvc 
-		DsmSVC DevicesFlowUserSvc_%service% DevQueryBroker diagsvc WdiServiceHost WdiSystemHost MSDTC dmwappushsvc 
+		DsmSVC DevicesFlowUserSvc_%service% DevQueryBroker diagsvc WdiServiceHost WdiSystemHost MSDTC 
 		embeddedmode EFS EntAppSvc EapHost Fax fhsvc fdPHost FDResPub lfsvc GraphicsPerfSvc HomeGroupListener 
 		HomeGroupProvider hidserv HvHost vmickvpexchange vmicguestinterface vmicshutdown vmicheartbeat 
 		vmicvmsession vmicrdv vmictimesync vmicvss IKEEXT irmon UI0Detect SharedAccess IpxlatCfgSvc PolicyAgent 
@@ -1083,7 +1152,7 @@ WinHttpAutoProxySvc dot3svc WlanSvc wmiApSrv XboxGipSvc) DO (
 	REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >NUL 2>&1
 	IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 3 >NUL 2>&1)
 ::Disabled
-FOR %%I IN (ALG tzautoupdate PeerDistSvc NfsClnt dmwappushsvc MapsBroker lfsvc HvHost 
+FOR %%I IN (ALG tzautoupdate PeerDistSvc NfsClnt dmwappushservice MapsBroker lfsvc HvHost 
 vmickvpexchange vmicguestinterface vmicshutdown vmicheartbeat vmicvmsession vmicrdv vmictimesync 
 vmicvss irmon SharedAccess AppVClient MSiSCSI SmsRouter CscService SEMgrSvc PhoneSvc RpcLocator 
 RemoteRegistry RetailDemo RemoteAccess SensorDataService SensrSvc SensorService shpamsvc SCardSvr 
@@ -1121,7 +1190,7 @@ W32Time wuauserv WinHttpAutoProxySvc dot3svc wmiApSrv XboxGipSvc) DO (
 	REG QUERY "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /ve >NUL 2>&1
 	IF NOT ERRORLEVEL 1 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\%%I" /F /v Start /T REG_DWORD /D 3 >NUL 2>&1)
 ::Disabled
-FOR %%I IN (ALG tzautoupdate PeerDistSvc NfsClnt dmwappushsvc MapsBroker lfsvc HvHost vmickvpexchange 
+FOR %%I IN (ALG tzautoupdate PeerDistSvc NfsClnt dmwappushservice MapsBroker lfsvc HvHost vmickvpexchange 
 vmicguestinterface vmicshutdown vmicheartbeat vmicvmsession vmicrdv vmictimesync vmicvss irmon 
 SharedAccess AppVClient MSiSCSI SmsRouter CscService SEMgrSvc PhoneSvc RpcLocator RemoteRegistry 
 RetailDemo RemoteAccess shpamsvc SCardSvr ScDeviceEnum SCPolicySvc SNMPTRAP UevAgentService FrameServer 
