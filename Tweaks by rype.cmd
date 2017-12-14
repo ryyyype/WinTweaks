@@ -735,8 +735,8 @@ REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\DiagTrack" /F /v Start /T REG_DW
 wmic useraccount where name='%username%' get sid /format:list|findstr /C:"SID=">%~dp0\tmp.tmp
 FOR /f "usebackq" %%v in (%~dp0\tmp.tmp) DO SET uSID=%%v
 DEL "%~dp0\tmp.tmp" /f /s /q >NUL 2>&1
-SET uSID = %uSID:~4%
-REG ADD "HKLM\SOFTWARE\Microsoft\WcmSvc\wifinetworkmanager\features\!uSID!" /F /v FeatureStates /T REG_DWORD /D 33C >NUL 2>&1
+SET uSID=!uSID:~4!
+REG ADD "HKLM\SOFTWARE\Microsoft\WcmSvc\wifinetworkmanager\features\!uSID!" /F /v FeatureStates /T REG_DWORD /D 0x33C >NUL 2>&1
 REG ADD "HKLM\SOFTWARE\Microsoft\WcmSvc\wifinetworkmanager\features" /F /v WiFiSenseCredShared /T REG_DWORD /D 0 >NUL 2>&1
 REG ADD "HKLM\SOFTWARE\Microsoft\WcmSvc\wifinetworkmanager\features" /F /v WiFiSenseOpen /T REG_DWORD /D 0 >NUL 2>&1
 REG ADD "HKLM\SOFTWARE\Policies\Microsoft\SQMClient\Windows" /F /v CEIPEnable /T REG_DWORD /D 0 >NUL 2>&1
@@ -747,7 +747,7 @@ REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows\AppCompat" /F /v AITEnable /T 
 REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors" /F /v DisableSensors /T REG_DWORD /D 1 >NUL 2>&1
 REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows\TabletPC" /F /v PreventHandwritingDataSharing /T REG_DWORD /D 1 >NUL 2>&1
 IF EXIST %ProgramFiles(x86)% (
-	REG ADD "HKLM\SOFTWARE\WOW6432Node\Microsoft\WcmSvc\wifinetworkmanager\features\!uSID!" /F /v FeatureStates /T REG_DWORD /D 33C >NUL 2>&1
+	REG ADD "HKLM\SOFTWARE\WOW6432Node\Microsoft\WcmSvc\wifinetworkmanager\features\!uSID!" /F /v FeatureStates /T REG_DWORD /D 0x33C >NUL 2>&1
 	REG ADD "HKLM\SOFTWARE\WOW6432Node\Microsoft\WcmSvc\wifinetworkmanager\features" /F /v WiFiSenseCredShared /T REG_DWORD /D 0 >NUL 2>&1
 	REG ADD "HKLM\SOFTWARE\WOW6432Node\Microsoft\WcmSvc\wifinetworkmanager\features" /F /v WiFiSenseOpen /T REG_DWORD /D 0 >NUL 2>&1
 	REG ADD "HKLM\SOFTWARE\WOW6432Node\Policies\Microsoft\SQMClient\Windows" /F /v CEIPEnable /T REG_DWORD /D 0 >NUL 2>&1
