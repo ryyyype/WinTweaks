@@ -1,7 +1,7 @@
 @ECHO off &SETLOCAL ENABLEEXTENSIONS ENABLEDELAYEDEXPANSION
 ECHO Checking for Administrator elevation...
 ECHO.
-openfiles > NUL 2>&1
+openfiles >NUL 2>&1
 IF NOT ERRORLEVEL 1 (
         ECHO Elevation found! Proceeding...
 ) ELSE (
@@ -11,7 +11,7 @@ IF NOT ERRORLEVEL 1 (
         ECHO Right-click and select ^'Run as Administrator^' and try again...
         ECHO.
         ECHO Press any key to exit...
-        PAUSE > NUL
+        PAUSE >NUL
         exit
 )
 
@@ -203,7 +203,7 @@ IF %winversion% == 100 (
 	REG ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" /F /v "Scheduling Category" /T REG_SZ /D "High" >NUL 2>&1
 	REG ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" /F /v "SFIO Priority" /T REG_SZ /D "High" >NUL 2>&1
 	
-	CALL :XECHO Set System Crash Dump Behavior to 3 (Small Dumps)
+	CALL :XECHO System Crash Dump Behavior (Small Dumps)
 	REG ADD "HKLM\SOFTWARE\Microsoft\Windows\Windows Error Reporting" /F /v CrashDumpEnabled /T REG_DWORD /D 3 >NUL 2>&1
 	REG ADD "HKLM\SYSTEM\CurrentControlSet\Control\CrashControl" /F /v CrashDumpEnabled /T REG_DWORD /D 3 >NUL 2>&1
 	
@@ -241,7 +241,7 @@ IF %winversion% == 100 (
 	CALL :XECHO Disable Biometrics
 	REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Biometrics" /F /v Enabled /T REG_DWORD /D 0 >NUL 2>&1
 
-	CALL :XECHO Disable the Windows Update feature
+	CALL :XECHO Disable Windows Update Feature
 	REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /F /v NoAutoUpdate /T REG_DWORD /D 1 >NUL 2>&1
 	
 	CALL :XECHO Disable Windows Update Delivery Optimization
@@ -249,6 +249,8 @@ IF %winversion% == 100 (
 	IF EXIST %ProgramFiles(x86)% (
 		REG ADD "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config" /F /v DODownloadMode /T REG_DWORD /D 0 >NUL 2>&1
 	)
+	REG ADD "HKCU\Software\Microsoft\Windows\CurrentVersion\DeliveryOptimization" /F /v SystemSettingsDownloadMode /T REG_DWORD /D 3 >NUL 2>&1
+	
 	CALL :XECHO Disable Automatic Driver Updates
 	REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /F /v ExcludeWUDriversInQualityUpdate /T REG_DWORD /D 1 >NUL 2>&1
 	
@@ -474,7 +476,7 @@ IF %winversion% == 100 (
 	CALL :XECHO Disable Teredo Tunneling Adapter and other Adapter
 	FOR %%I IN ("Microsoft Kernel Debug Network Adapter" "WAN Miniport" "WAN-Miniport" "Teredo Tunneling") DO powershell "Get-PnpDevice | Where-Object {$_.FriendlyName -match '%%I'} | Disable-PnpDevice -Confirm:$false"  >NUL 2>&1
 	CALL :XECHO Disable some network adapter bindings
-	FOR %%I IN (ms_msclient ms_lldp ms_lltdio ms_rspndr ms_server ms_pacer) DO powershell "Get-NetAdapter -physical | Where-Object {$_.Status -eq 'Up'} | Disable-NetAdapterBinding -ComponentID %%I"  >NUL 2>&1
+	FOR %%I IN (ms_msclient ms_lldp ms_lltdio ms_rspndr ms_server ms_pacer) DO powershell "Get-NetAdapter -physical | Where-Object {$_.Status -eq 'Up'} | Disable-NetAdapterBinding -ComponentID '%%I'"  >NUL 2>&1
 )
 IF NOT DEFINED AUTOTWEAK GOTO :HOME
 IF DEFINED AUTOTWEAK GOTO :RMONEDRIVE
@@ -601,8 +603,8 @@ CHOICE /C:YN /M "Do you use GeForce Experience"
 IF ERRORLEVEL 2 (
 	FOR %%I IN (gfwsl.geforce.com gfe.geforce.com telemetry.nvidia.com
 	gfe.nvidia.com telemetry.gfe.nvidia.com events.gfe.nvidia.com) DO ( 
-		FIND /C /I "%%I" %WINDIR%\system32\drivers\etc\hosts >NUL 2>&1
-		IF ERRORLEVEL 1 (
+		FINDSTR /X /C:"0.0.0.0 %%I" %WINDIR%\system32\drivers\etc\hosts >NUL 2>&1
+		IF !ERRORLEVEL! NEQ 0 (
 			CALL :XECHOF Add %%I to hosts
 			ECHO ^0.0.0.0 %%I>>%WINDIR%\system32\drivers\etc\hosts
 		)
@@ -610,8 +612,8 @@ IF ERRORLEVEL 2 (
 )
 IF ERRORLEVEL 1 (
 	FOR %%I IN (gfe.geforce.com telemetry.nvidia.com telemetry.gfe.nvidia.com events.gfe.nvidia.com) DO ( 
-		FIND /C /I "%%I" %WINDIR%\system32\drivers\etc\hosts >NUL 2>&1
-		IF ERRORLEVEL 1 (
+		FINDSTR /X /C:"0.0.0.0 %%I" %WINDIR%\system32\drivers\etc\hosts >NUL 2>&1
+		IF !ERRORLEVEL! NEQ 0 (
 			CALL :XECHOF Add %%I to hosts
 			ECHO ^0.0.0.0 %%I>>%WINDIR%\system32\drivers\etc\hosts
 		)
@@ -622,10 +624,10 @@ GOTO :HOME
 :UNINSTALLRZSTATS
 CALL :XTITLE REMOVE RAZER STATS AND CHROMA SDK
 IF EXIST %PROGRAMDATA%\Razer\Synapse\ProductUpdates\Uninstallers\RzStats (
-	START /WAIT %PROGRAMDATA%\Razer\Synapse\ProductUpdates\Uninstallers\RzStats\Razer_RzStats_Uninstall.exe /S > NUL 2>&1
+	START /WAIT %PROGRAMDATA%\Razer\Synapse\ProductUpdates\Uninstallers\RzStats\Razer_RzStats_Uninstall.exe /S >NUL 2>&1
 )
 IF EXIST "%ProgramFiles(x86)%\Razer Chroma SDK" (
-	START /WAIT "%ProgramFiles(x86)%\Razer Chroma SDK\Razer_Chroma_SDK_Uninstaller.exe" /S > NUL 2>&1
+	START /WAIT "%ProgramFiles(x86)%\Razer Chroma SDK\Razer_Chroma_SDK_Uninstaller.exe" /S >NUL 2>&1
 )
 
 GOTO :HOME
@@ -646,7 +648,7 @@ FOR %%I IN (3DBuilder Appconnector BingFinance BingNews BingSports BingWeather G
 			HEVCVideoExtension Duolingo-LearnLanguagesforFree EclipseManager ActiproSoftwareLLC.562882FEEB491
 			BioEnrollment WindowsFeedback XboxGameOverlay XboxGameCallableUI XboxIdentityProvider 
 			ContactSupport XboxSpeechToTextOverlay MiracastView Print3D GetHelp HolographicFirstRun) DO (
-	powershell "Get-AppxPackage *%%I* -AllUsers | Remove-AppxPackage -AllUsers" >NUL 2>&1
+	powershell "Get-AppxPackage '*%%I*' -AllUsers | Remove-AppxPackage -AllUsers" >NUL 2>&1
 	powershell "Get-AppxProvisionedPackage -Online | Where-Object {$_.DisplayName -like '*%%I*'} | Remove-AppxProvisionedPackage -Online" >NUL 2>&1
 )
 CALL :XECHO Disable Consumer Features
@@ -661,61 +663,76 @@ GOTO :HOME
 CALL :XTITLE Uninstalling OneDrive
 SET x86="%SYSTEMROOT%\System32\OneDriveSetup.exe"
 SET x64="%SYSTEMROOT%\SysWOW64\OneDriveSetup.exe"
-taskkill /f /im OneDrive.exe > NUL 2>&1
-ping 127.0.0.1 -n 5 > NUL 2>&1 
+taskkill /f /im OneDrive.exe >NUL 2>&1
+ping 127.0.0.1 -n 5 >NUL 2>&1 
 IF EXIST %x64% (
 	START /WAIT %x64% /uninstall
 ) ELSE (
 	START /WAIT %x86% /uninstall
 )
-rd "%USERPROFILE%\OneDrive" /Q /S > NUL 2>&1
-rd "C:\OneDriveTemp" /Q /S > NUL 2>&1
-rd "%LOCALAPPDATA%\Microsoft\OneDrive" /Q /S > NUL 2>&1
-rd "%PROGRAMDATA%\Microsoft OneDrive" /Q /S > NUL 2>&1 
+rd "%USERPROFILE%\OneDrive" /Q /S >NUL 2>&1
+rd "C:\OneDriveTemp" /Q /S >NUL 2>&1
+rd "%LOCALAPPDATA%\Microsoft\OneDrive" /Q /S >NUL 2>&1
+rd "%PROGRAMDATA%\Microsoft OneDrive" /Q /S >NUL 2>&1 
 ECHO.
 ECHO Removeing OneDrive from the Explorer Side Panel.
-REG DELETE "HKEY_CLASSES_ROOT\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" /f > NUL 2>&1
-REG DELETE "HKEY_CLASSES_ROOT\Wow6432Node\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" /f > NUL 2>&1
-REG DELETE "HKCU\Software\Microsoft\Windows\CurrentVersion\Run" /f /v OneDriveSetup > NUL 2>&1
+REG DELETE "HKEY_CLASSES_ROOT\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" /f >NUL 2>&1
+REG DELETE "HKEY_CLASSES_ROOT\Wow6432Node\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" /f >NUL 2>&1
+REG DELETE "HKCU\Software\Microsoft\Windows\CurrentVersion\Run" /f /v OneDriveSetup >NUL 2>&1
 IF NOT DEFINED AUTOTWEAK GOTO :HOME
 IF DEFINED AUTOTWEAK GOTO :RMTELEMETRY
 GOTO :HOME
 
 
 :::::::::::::::::::::::::::::::::
-:: Disable MICROSOFT TELEMETRY ::
+:: DISABLE MICROSOFT TELEMETRY ::
 :::::::::::::::::::::::::::::::::
 :RMTELEMETRY
-CALL :XTITLE EDITING HOSTS FILE
+CALL :XTITLE DISABLE MICROSOFT TELEMETRY
+CALL :XECHO Editing Hosts File
 FOR %%I IN (choice.microsoft.com choice.microsoft.com.nstac.net df.telemetry.microsoft.com
 			oca.telemetry.microsoft.com oca.telemetry.microsoft.com.nsatc.net
 			redir.metaservices.microsoft.com reports.wes.df.telemetry.microsoft.com
 			services.wes.df.telemetry.microsoft.com settings-sandbox.data.microsoft.com
-			settings-win.data.microsoft.com sqm.df.telemetry.microsoft.com
+			settings-win.data.microsoft.com sqm.df.telemetry.microsoft.com 
 			sqm.telemetry.microsoft.com sqm.telemetry.microsoft.com.nsatc.net
 			telecommand.telemetry.microsoft.com telecommand.telemetry.microsoft.com.nsatc.net
 			telemetry.appex.bing.net telemetry.microsoft.com telemetry.urs.microsoft.com
-			vortex-sandbox.data.microsoft.com vortex-win.data.microsoft.com
-			vortex.data.microsoft.com watson.telemetry.microsoft.com spynetalt.microsoft.com
-			watson.telemetry.microsoft.com.nsatc.net watson.ppe.telemetry.microsoft.com
-			wes.df.telemetry.microsoft.com vortex-bn2.metron.live.com.nsatc.net
-			vortex-cy2.metron.live.com.nsatc.net watson.live.com watson.microsoft.com
-			feedback.search.microsoft.com feedback.windows.com corp.sts.microsoft.com
-			diagnostics.support.microsoft.com i1.services.social.microsoft.com 
-			i1.services.social.microsoft.com.nsatc.net vortex-bn2.metron.live.com.nsatc.net
-			vortex-cy2.metron.live.com.nsatc.net ca.telemetry.microsoft.com
-			cache.datamart.windows.com diagnostics.support.microsoft.com spynet2.microsoft.com) DO ( 
-	FIND /C /I "%%I" %WINDIR%\system32\drivers\etc\hosts > NUL 2>&1
-	IF ERRORLEVEL 1 (
+			vortex-sandbox.data.microsoft.com vortex-win.data.microsoft.com vortex.data.microsoft.com
+			watson.telemetry.microsoft.com watson.telemetry.microsoft.com.nsatc.net
+			watson.ppe.telemetry.microsoft.com wes.df.telemetry.microsoft.com 
+			vortex-bn2.metron.live.com.nsatc.net vortex-cy2.metron.live.com.nsatc.net
+			watson.live.com watson.microsoft.com feedback.search.microsoft.com feedback.windows.com
+			corp.sts.microsoft.com diagnostics.support.microsoft.com i1.services.social.microsoft.com
+			i1.services.social.microsoft.com.nsatc.net ca.telemetry.microsoft.com
+			cache.datamart.windows.com spynet2.microsoft.com spynetalt.microsoft.com
+			a.ads1.msn.com a.ads2.msads.net a.ads2.msn.com a.rad.msn.com a-0001.a-msedge.net
+			a-0002.a-msedge.net a-0003.a-msedge.net a-0004.a-msedge.net a-0005.a-msedge.net
+			a-0006.a-msedge.net a-0007.a-msedge.net a-0008.a-msedge.net a-0009.a-msedge.net ac3.msn.com
+			ad.doubleclick.net adnexus.net adnxs.com ads.msn.com ads1.msads.net ads1.msn.com aidps.atdmt.com
+			aka-cdn-ns.adtech.de a-msedge.net apps.skype.com az361816.vo.msecnd.net az512334.vo.msecnd.net
+			b.ads1.msn.com b.ads2.msads.net b.rad.msn.com bs.serving-sys.com c.atdmt.com c.msn.com
+			cdn.atdmt.com cds26.ams9.msecn.net compatexchange.cloudapp.net 
+			corpext.msitadfs.glbdns2.microsoft.com cs1.wpc.v0cdn.net db3aqu.atdmt.com ec.atdmt.com
+			fe2.update.microsoft.com.akadns.net feedback.microsoft-hohm.com flex.msn.com g.msn.com
+			h1.msn.com lb1.www.ms.akadns.net live.rads.msn.com m.adnxs.com m.hotmail.com msedge.net
+			msftncsi.com msnbot-65-55-108-23.search.msn.com msntest.serving-sys.com pre.footprintpredict.com
+			preview.msn.com pricelist.skype.com rad.live.com rad.msn.com s.gateway.messenger.live.com
+			s0.2mdn.net schemas.microsoft.akadns.net secure.adnxs.com secure.flashtalking.com
+			sls.update.microsoft.com.akadns.net static.2mdn.net statsfe1.ws.microsoft.com 
+			statsfe2.update.microsoft.com.akadns.net statsfe2.ws.microsoft.com survey.watson.microsoft.com
+			view.atdmt.com www.msftncsi.com) DO ( 
+	FINDSTR /X /C:"0.0.0.0 %%I" %WINDIR%\system32\drivers\etc\hosts >NUL 2>&1
+	IF !ERRORLEVEL! NEQ 0 (
 		CALL :XECHOF Add %%I to hosts
 		ECHO ^0.0.0.0 %%I>>%WINDIR%\system32\drivers\etc\hosts
 	)
 )
-::Stop Telemetry Services
+CALL :XECHO Stop Telemetry Services
 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\dmwappushservice" /F /v Start /T REG_DWORD /D 4 >NUL 2>&1
 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\DiagTrack" /F /v Start /T REG_DWORD /D 4 >NUL 2>&1
 
-wmic useraccount where name='%username%' get sid /format:list|findstr /C:"SID=" > %~dp0\tmp.tmp
+wmic useraccount where name='%username%' get sid /format:list|findstr /C:"SID=">%~dp0\tmp.tmp
 FOR /f "usebackq" %%v in (%~dp0\tmp.tmp) DO SET uSID=%%v
 DEL "%~dp0\tmp.tmp" /f /s /q >NUL 2>&1
 SET uSID = %uSID:~4%
@@ -741,6 +758,7 @@ IF EXIST %ProgramFiles(x86)% (
 	REG ADD "HKLM\SOFTWARE\WOW6432Node\Policies\Microsoft\Windows\LocationAndSensors" /F /v DisableSensors /T REG_DWORD /D 1 >NUL 2>&1
 	REG ADD "HKLM\SOFTWARE\WOW6432Node\Policies\Microsoft\Windows\TabletPC" /F /v PreventHandwritingDataSharing /T REG_DWORD /D 1 >NUL 2>&1
 )
+REG ADD "HKCU\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo" /F /v Enabled /T REG_DWORD /D 0 >NUL 2>&1
 IF NOT DEFINED AUTOTWEAK GOTO :HOME
 IF DEFINED AUTOTWEAK GOTO :AUTOTWEAKS
 
