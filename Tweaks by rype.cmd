@@ -151,15 +151,22 @@ IF %winversion% == 100 (
 	CALL :XECHO Remove 3D-Objects, Music, Pictures and Video Folders
 	::3D-Objects
 	REG DELETE "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{0DB7E03F-FC29-4DC6-9020-FF41B59E513A}" /F >NUL 2>&1
+	REG DELETE "HKLM\Wow6432Node\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{0DB7E03F-FC29-4DC6-9020-FF41B59E513A}" /F >NUL 2>&1
 	::Music
 	REG DELETE "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{1CF1260C-4DD0-4ebb-811F-33C572699FDE}" /F >NUL 2>&1
 	REG DELETE "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{3dfdf296-dbec-4fb4-81d1-6a3438bcf4de}" /F >NUL 2>&1
+	REG DELETE "HKLM\Wow6432Node\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{1CF1260C-4DD0-4ebb-811F-33C572699FDE}" /F >NUL 2>&1
+	REG DELETE "HKLM\Wow6432Node\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{3dfdf296-dbec-4fb4-81d1-6a3438bcf4de}" /F >NUL 2>&1
 	::Pictures
 	REG DELETE "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{3ADD1653-EB32-4cb0-BBD7-DFA0ABB5ACCA}" /F >NUL 2>&1
 	REG DELETE "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{24ad3ad4-a569-4530-98e1-ab02f9417aa8}" /F >NUL 2>&1
+	REG DELETE "HKLM\Wow6432Node\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{3ADD1653-EB32-4cb0-BBD7-DFA0ABB5ACCA}" /F >NUL 2>&1
+	REG DELETE "HKLM\Wow6432Node\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{24ad3ad4-a569-4530-98e1-ab02f9417aa8}" /F >NUL 2>&1
 	::Video
 	REG DELETE "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{A0953C92-50DC-43bf-BE83-3742FED03C9C}" /F >NUL 2>&1
 	REG DELETE "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{f86fa3ab-70d2-4fc7-9c99-fcbf05467f3a}" /F >NUL 2>&1
+	REG DELETE "HKLM\Wow6432Node\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{A0953C92-50DC-43bf-BE83-3742FED03C9C}" /F >NUL 2>&1
+	REG DELETE "HKLM\Wow6432Node\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{f86fa3ab-70d2-4fc7-9c99-fcbf05467f3a}" /F >NUL 2>&1
 	
 	CALL :XECHO Remove Search Box From Taskbar
 	REG ADD "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /F /v SearchboxTaskbarMode /T REG_DWORD /D 0 >NUL 2>&1
@@ -291,8 +298,14 @@ IF %winversion% == 100 (
 	REG ADD "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" /F /v "SettingsPageVisibility" /T REG_SZ /D "hide:mobile-devices;windowsinsider" >NUL 2>&1
 	
 	CALL :XECHO Disable Scheduled Tasks 
-	FOR %%I IN (ProgramDataUpdater Proxy Consolidator KernelCeipTask UsbCeip Microsoft-Windows-DiskDiagnosticDataCollector
-				Microsoft-Windows-DiskDiagnosticResolver WinSAT "Microsoft Compatibility Appraiser") DO (
+	FOR %%I IN (".NET Framework NGEN v4.0.30319" ".NET Framework NGEN v4.0.30319 64"
+				".NET Framework NGEN v4.0.30319 64 Critical" ".NET Framework NGEN v4.0.30319 Critical"
+				SmartScreenSpecific "Microsoft Compatibility Appraiser" ProgramDataUpdater Proxy
+				CreateObjectTask Consolidator KernelCeipTask UsbCeip 
+				Microsoft-Windows-DiskDiagnosticDataCollector Microsoft-Windows-DiskDiagnosticResolver
+				DmClient WinSAT "MNO Metadata Parser" "Windows Defender Cache Maintenance"
+				"Windows Defender Cleanup" "Windows Defender Scheduled Scan" "Windows Defender Verification"
+				"QueueReporting") DO (
 		powershell "Get-ScheduledTask -TaskName '%%I' | Disable-ScheduledTask" >NUL 2>&1 )
 	
 	CALL :XECHO Disable Windows Optional Features
@@ -304,27 +317,27 @@ IF %winversion% == 100 (
 	FTYPE InternetShortcut="C:\Windows\System32\rundll32.exe" "C:\Windows\System32\ieframe.dll",OpenURL %l >NUL 2>&1
 	ASSOC .URL=InternetShortcut >NUL 2>&1
 	::Export Default Associations
-	dism /online /Export-DefaultAppAssociations:"%~dp0\assoc.xml" >NUL 2>&1
+	dism /online /Export-DefaultAppAssociations:"%~dp0assoc.xml" >NUL 2>&1
 	::Edit assoc.xml
 	SET assocURL="<Association Identifier=".url" ProgId="IE.AssocFile.URL" ApplicationName="Internet Browser" />"
-	FIND /C /I %assocURL% %~dp0\assoc.xml >NUL 2>&1
+	FIND /C /I %assocURL% %~dp0assoc.xml >NUL 2>&1
 	IF NOT ERRORLEVEL 1 (
-		for /f "tokens=*" %%a in (%~dp0\assoc.xml) do (
-			IF EXIST %~dp0\assoc2.xml (
-				ECHO %%a >> %~dp0\assoc2.xml
+		for /f "tokens=*" %%a in (%~dp0assoc.xml) do (
+			IF EXIST %~dp0assoc2.xml (
+				ECHO %%a >> %~dp0assoc2.xml
 			) ELSE (
-				ECHO %%a > %~dp0\assoc2.xml
+				ECHO %%a > %~dp0assoc2.xml
 			)
 			IF "%%a" == "<DefaultAssociations>" (
-				ECHO ^%assocURL:~1,-3%^/^> >> "%~dp0\assoc2.xml"
+				ECHO ^%assocURL:~1,-3%^/^> >> "%~dp0assoc2.xml"
 			)
 		)
 	)
 	::Import Default Associations
-	dism /online /Import-DefaultAppAssociations:"%~dp0\assoc2.xml" >NUL 2>&1
+	dism /online /Import-DefaultAppAssociations:"%~dp0assoc2.xml" >NUL 2>&1
 	::Delete assoc.xml
-	DEL /F /Q "%~dp0\assoc.xml" >NUL 2>&1
-	DEL /F /Q "%~dp0\assoc2.xml" >NUL 2>&1
+	DEL /F /Q "%~dp0assoc.xml" >NUL 2>&1
+	DEL /F /Q "%~dp0assoc2.xml" >NUL 2>&1
 	
 	CALL :XECHO OS Visual FX Tweaks - Less Animations
 	REG ADD "HKCU\Control Panel\Desktop\WindowMetrics" /F /v VisualFXSetting /T REG_DWORD /D 3 >NUL 2>&1
@@ -624,10 +637,10 @@ GOTO :HOME
 :UNINSTALLRZSTATS
 CALL :XTITLE REMOVE RAZER STATS AND CHROMA SDK
 IF EXIST %PROGRAMDATA%\Razer\Synapse\ProductUpdates\Uninstallers\RzStats (
-	START /WAIT %PROGRAMDATA%\Razer\Synapse\ProductUpdates\Uninstallers\RzStats\Razer_RzStats_Uninstall.exe /S >NUL 2>&1
+	START /WAIT %PROGRAMDATA%\Razer\Synapse\ProductUpdates\Uninstallers\RzStats\Razer_RzStats_Uninstall.exe >NUL 2>&1
 )
 IF EXIST "%ProgramFiles(x86)%\Razer Chroma SDK" (
-	START /WAIT "%ProgramFiles(x86)%\Razer Chroma SDK\Razer_Chroma_SDK_Uninstaller.exe" /S >NUL 2>&1
+	START /WAIT "%ProgramFiles(x86)%\Razer Chroma SDK\Razer_Chroma_SDK_Uninstaller.exe" >NUL 2>&1
 )
 
 GOTO :HOME
@@ -732,9 +745,9 @@ CALL :XECHO Stop Telemetry Services
 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\dmwappushservice" /F /v Start /T REG_DWORD /D 4 >NUL 2>&1
 REG ADD "HKLM\SYSTEM\CurrentControlSet\Services\DiagTrack" /F /v Start /T REG_DWORD /D 4 >NUL 2>&1
 
-wmic useraccount where name='%username%' get sid /format:list|findstr /C:"SID=">%~dp0\tmp.tmp
-FOR /f "usebackq" %%v in (%~dp0\tmp.tmp) DO SET uSID=%%v
-DEL "%~dp0\tmp.tmp" /f /s /q >NUL 2>&1
+wmic useraccount where name='%username%' get sid /format:list|findstr /C:"SID=">%~dp0tmp.tmp
+FOR /f "usebackq" %%v in (%~dp0tmp.tmp) DO SET uSID=%%v
+DEL "%~dp0tmp.tmp" /f /s /q >NUL 2>&1
 SET uSID=!uSID:~4!
 REG ADD "HKLM\SOFTWARE\Microsoft\WcmSvc\wifinetworkmanager\features\!uSID!" /F /v FeatureStates /T REG_DWORD /D 0x33C >NUL 2>&1
 REG ADD "HKLM\SOFTWARE\Microsoft\WcmSvc\wifinetworkmanager\features" /F /v WiFiSenseCredShared /T REG_DWORD /D 0 >NUL 2>&1
@@ -777,7 +790,7 @@ GOTO :eof
 :CLEANER
 CALL :XTITLE WINDOWS CLEANER
 CALL :XECHO Clean Windows with cleanmgr
-powershell -ExecutionPolicy Bypass "& '%~dp0\resources\WindowsCleanup.ps1'" >NUL 2>&1
+powershell -ExecutionPolicy Bypass "& '%~dp0resources\WindowsCleanup.ps1'" >NUL 2>&1
 IF EXIST %LOCALAPPDATA%\Mozilla\Firefox\Profiles (
 	CALL :XECHO Clear Firefox cache
 	DEL "%LOCALAPPDATA%\Mozilla\Firefox\Profiles\*.*" /f /s /q >NUL 2>&1
@@ -788,10 +801,10 @@ GOTO :HOME
 :UNUSEDDRIVER
 CALL :XTITLE REMOVE UNUSED DRIVERS
 IF EXIST %ProgramFiles(x86)% (
-	CALL %~dp0\resources\x64\DeviceCleanupCmd.exe * -s
+	CALL %~dp0resources\x64\DeviceCleanupCmd.exe * -s
 	MODE con lines=40 cols=59
 ) ELSE (
-	CALL %~dp0\resources\x86\DeviceCleanupCmd.exe * -s
+	CALL %~dp0resources\x86\DeviceCleanupCmd.exe * -s
 	MODE con lines=40 cols=59
 )
 GOTO :HOME
@@ -1221,11 +1234,11 @@ GOTO :HOME
 :: BATCH SCRIPT INTERNAL FUNCTIONS ::
 :::::::::::::::::::::::::::::::::::::
 :XSVCTOKEN
-REG EXPORT HKLM\SYSTEM\CurrentControlSet\Services %~dp0\TEMP.reg >NUL 2>&1
-FOR /F "SKIP=2" %%u IN ('FIND "CDPUserSvc_" %~dp0\TEMP.reg') DO (
+REG EXPORT HKLM\SYSTEM\CurrentControlSet\Services %~dp0TEMP.reg >NUL 2>&1
+FOR /F "SKIP=2" %%u IN ('FIND "CDPUserSvc_" %~dp0TEMP.reg') DO (
 	FOR /F "TOKENS=1 DELIMS=<[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\CDPUserSvc_>" %%a in ("%%u") DO (
 		SET service=%%a
-		DEL /F /Q "%~dp0\TEMP.reg" >NUL 2>&1
+		DEL /F /Q "%~dp0TEMP.reg" >NUL 2>&1
 		GOTO :BREAK
 	)
 )
