@@ -391,7 +391,7 @@ FOR /F %%A IN ('REG QUERY "HKLM\SYSTEM\CurrentControlSet\Control\Class\{4D36E972
 	IF NOT ERRORLEVEL 1 REG ADD "!REGPATH!" /F /V "*SSIdleTimeout" /T REG_SZ /D 60 >NUL 2>&1
 	REG QUERY "!REGPATH!" /V "LogLinkStateEvent" >NUL 2>&1
 	IF NOT ERRORLEVEL 1 REG ADD "!REGPATH!" /F /V "LogLinkStateEvent" /T REG_SZ /D 16 >NUL 2>&1
-	REG QUERY "!REGPATH!" /V "*TransmitBuffers" >NUL 2>&1
+	REG QUERY "!REGPATH!" /V "*ReceiveBuffers" >NUL 2>&1
 	IF NOT ERRORLEVEL 1 REG ADD "!REGPATH!" /F /V "*ReceiveBuffers" /T REG_SZ /D 96 >NUL 2>&1
 	REG QUERY "!REGPATH!" /V "*TransmitBuffers" >NUL 2>&1
 	IF NOT ERRORLEVEL 1 REG ADD "!REGPATH!" /F /V "*TransmitBuffers" /T REG_SZ /D 96 >NUL 2>&1
@@ -469,7 +469,7 @@ IF %winversion% == 100 (
 	powershell "Set-NetTCPSetting -SettingName InternetCustom -NonSackRttResiliency disabled" >NUL 2>&1
 	CALL :XECHO Initial RTO and Min RTO
 	powershell "Set-NetTCPSetting -SettingName InternetCustom -InitialRto 2000" >NUL 2>&1
-	powershell "SET-NetTCPSetting -SettingName InternetCustom -MinRto 300" >NUL 2>&1
+	powershell "Set-NetTCPSetting -SettingName InternetCustom -MinRto 300" >NUL 2>&1
 	CALL :XECHO Internet Explorer Optimization	
 	REG ADD "HKLM\SOFTWARE\Microsoft\Internet Explorer\MAIN\FeatureControl\FEATURE_MAXCONNECTIONSPER1_0SERVER" /F /v explorer.exe /T REG_DWORD /D 10 >NUL 2>&1
 	REG ADD "HKLM\SOFTWARE\Microsoft\Internet Explorer\MAIN\FeatureControl\FEATURE_MAXCONNECTIONSPERSERVER" /F /v explorer.exe /T REG_DWORD /D 10 >NUL 2>&1
